@@ -3,6 +3,7 @@ from pyArango.collection import Collection, Field
 
 class User(Collection):
     _fields = {
+        "id": Field(),
         "first_name": Field(),
         "last_name": Field(),
         "email": Field(),

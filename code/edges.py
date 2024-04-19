@@ -9,7 +9,15 @@ class Matches(Edges):  # User - User
     _fields = {}
 
 
-class Interest(Edges):  # User - Movie & User - MovieCategory & User - Color
+class IntMovie(Edges):  # User - Movie
+    _fields = {}
+
+
+class IntMovieCategory(Edges):  # User - MovieCategory
+    _fields = {}
+
+
+class IntColor(Edges):  # User - Color
     _fields = {}
 
 
