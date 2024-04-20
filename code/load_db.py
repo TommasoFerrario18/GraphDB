@@ -40,38 +40,44 @@ def get_movie_genres(nodes):
 
 # Load movie, movie category, color, university, city and country nodes
 def load_basic_nodes(nodes, my_graph):
-    # movie_genres = get_movie_genres(nodes)
 
-    # for genre in movie_genres:
-    #     my_graph.createVertex("MovieCategory", {"_key": genre, "name": genre})
+    try:
 
-    # colors = nodes["favourite_color"].dropna().unique().tolist()
-    # for color in colors:
-    #     my_graph.createVertex("Color", {"_key": color, "name": color})
+        movie_genres = get_movie_genres(nodes)
 
-    # movies = nodes["favourite_movie"].dropna().unique().tolist()
-    # for movie in movies:
-    #     my_graph.createVertex("Movie", {"title": movie})
+        for genre in movie_genres:
+            my_graph.createVertex("MovieCategory", {"_key": genre, "name": genre})
 
-    # universities = nodes["university"].dropna().unique().tolist()
-    # for university in universities:
-    #     my_graph.createVertex("University", {"name": university})
+        colors = nodes["favourite_color"].dropna().unique().tolist()
+        for color in colors:
+            my_graph.createVertex("Color", {"_key": color, "name": color})
+
+        movies = nodes["favourite_movie"].dropna().unique().tolist()
+        for movie in movies:
+            my_graph.createVertex("Movie", {"title": movie})
+
+        universities = nodes["university"].dropna().unique().tolist()
+        for university in universities:
+            my_graph.createVertex("University", {"name": university})
 
 
-    country_combinations = nodes.groupby(['country', 'continent', "country_code"]).size().reset_index().drop_duplicates()
+        country_combinations = nodes.groupby(['country', 'continent', "country_code"]).size().reset_index().drop_duplicates()
 
-    for row in country_combinations.iterrows():
-        row = row[1]
-        name = ["country"]
-        code = row["country_code"]
-        continent = row["continent"]
-        my_graph.createVertex("Country", {"name": name, "code": code, "continent": continent})
+        for row in country_combinations.iterrows():
+            row = row[1]
+            name = ["country"]
+            code = row["country_code"]
+            continent = row["continent"]
+            my_graph.createVertex("Country", {"name": name, "code": code, "continent": continent})
 
-    city_combinations = nodes.groupby(['city', 'lat', "long"]).size().reset_index().drop_duplicates()
+        city_combinations = nodes.groupby(['city', 'lat', "long"]).size().reset_index().drop_duplicates()
 
-    for row in city_combinations.iterrows():
-        row = row[1]
-        name = row["city"]
-        lat = row["lat"]
-        long = row["long"]
-        my_graph.createVertex("City", {"name": name, "latitude": lat, "longitude": long})
+        for row in city_combinations.iterrows():
+            row = row[1]
+            name = row["city"]
+            lat = row["lat"]
+            long = row["long"]
+            my_graph.createVertex("City", {"name": name, "latitude": lat, "longitude": long})
+            
+    except:
+        print("Couldn't load basic nodes")
