@@ -8,7 +8,7 @@ class User(Collection):
         "last_name": Field(),
         "email": Field(),
         "phone": Field(),
-        "birthday": Field(),
+        "birth_date": Field(),
         "gender": Field(),
     }
 

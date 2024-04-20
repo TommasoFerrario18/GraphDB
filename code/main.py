@@ -11,3 +11,5 @@ db, my_graph = create_db()
 users = pd.read_csv("./data/nodes.csv").drop(["Unnamed: 0"], axis=1)
 
 load_basic_nodes(users, my_graph)
+
+load_users(users, my_graph)

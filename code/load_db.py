@@ -78,6 +78,20 @@ def load_basic_nodes(nodes, my_graph):
             lat = row["lat"]
             long = row["long"]
             my_graph.createVertex("City", {"name": name, "latitude": lat, "longitude": long})
-            
+
     except:
         print("Couldn't load basic nodes")
+
+def load_users(nodes, my_graph):
+    for row in nodes.iterrows():
+        #print(row)
+        row=row[1]
+        my_graph.createVertex("User", {
+            "_key": str(row["id"]),
+            "first_name": row["first_name"],
+            "last_name": row["last_name"],
+            "email": row["email"],
+            "phone": row["phone"],
+            "birth_date": row["birthDate"],
+            "gender": row["gender"]
+            })
