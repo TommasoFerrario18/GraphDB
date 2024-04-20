@@ -32,14 +32,14 @@ pip install pyarango
   - phone
   - birthday
   - gender
+  - Latitude
+  - Longitude
 - Movie
   - title
 - MovieCategory
-    -Name
+  - Name
 - City
   - Name
-  - Latitude
-  - Longitude
 - Country
   - Name
   - Code
