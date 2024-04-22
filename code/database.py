@@ -75,7 +75,7 @@ def load_cities(cities: dict, graph):
         city_info = cities[city]
         graph.createVertex(
             "City",
-            {"name": city, "latitude": city_info[0][0], "longitude": city_info[0][1]},
+            {"name": city},
         )
     end = time.time()
     print("Cities loaded in ", end - start, " seconds\n")
@@ -113,6 +113,8 @@ def load_users(nodes: pd.DataFrame, graph, db):
                 "phone": row["phone"],
                 "birth_date": row["birthDate"],
                 "gender": row["gender"],
+                "latitude": row["lat"],
+                "longitude": row["long"]
             },
         )
         load_movie_genre_edges(row, user._id, graph, db)

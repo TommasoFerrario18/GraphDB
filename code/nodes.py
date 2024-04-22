@@ -10,6 +10,8 @@ class User(Collection):
         "phone": Field(),
         "birth_date": Field(),
         "gender": Field(),
+        "latitude": Field(),
+        "longitude": Field()
     }
 
 
@@ -22,7 +24,7 @@ class MovieCategory(Collection):
 
 
 class City(Collection):
-    _fields = {"name": Field(), "latitude": Field(), "longitude": Field()}
+    _fields = {"name": Field()}
 
 
 class Country(Collection):
