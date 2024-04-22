@@ -4,12 +4,19 @@ from edges import *
 from pyArango.graph import Graph, EdgeDefinition
 from make_graph import SoulSyncGraph
 import pandas as pd
-from load_db import *
+from database import *
+
+# from load_db import *
+
+def fill_db(users: pd.DataFrame, edges: pd.DataFrame, graph, db: Database):
+    load_basic_nodes(users, graph, db)
+    load_user_edges(edges, graph)
+    load_country_city_edges(db, graph, users[["city", "country"]].drop_duplicates())
+
 
 db, my_graph = create_db()
 
 users = pd.read_csv("./data/nodes.csv").drop(["Unnamed: 0"], axis=1)
+edges = pd.read_csv("./data/edges.csv")
 
-load_basic_nodes(users, my_graph)
-
-load_users(users, my_graph)
+fill_db(users, edges, my_graph, db)

@@ -53,5 +53,12 @@ pip install pyarango
 
 - Utente-Film: il film preferito dell'utente
 - Utente-Università: l'università che frequenta o ha frequentato
-- Film-Categoria del film: la categoria del film
 - Utente-Città: la città in cui vive l'utente
+
+## Esempio di query
+
+Vogliamo ottenere tutte le città che si trovano in Australia.
+
+``` AQL
+FOR city IN 1..1 OUTBOUND "Country/AU" LocatedIn RETURN city
+```

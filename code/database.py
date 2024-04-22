@@ -43,6 +43,8 @@ def load_movie_genres(movie_genres: list, graph):
     print("Loading movie genres...\nSize: ", len(movie_genres), "\n")
     start = time.time()
     for genre in movie_genres:
+        if genre == "nan" or genre == "(nogenreslisted)":
+            continue
         graph.createVertex("MovieCategory", {"_key": genre, "name": genre})
     end = time.time()
     print("Movie genres loaded in ", end - start, " seconds\n")
@@ -84,17 +86,46 @@ def load_countries(countries: pd.DataFrame, graph):
     start = time.time()
     for row in countries.iterrows():
         row = row[1]
-        name = ["country"]
+        name = row["country"]
         code = row["country_code"]
         continent = row["continent"]
         graph.createVertex(
-            "Country", {"name": name, "code": code, "continent": continent}
+            "Country",
+            {"_key": code, "name": name, "code": code, "continent": continent},
         )
     end = time.time()
     print("Countries loaded in ", end - start, " seconds\n")
 
 
-def load_basic_nodes(nodes: pd.DataFrame, my_graph):
+def load_users(nodes: pd.DataFrame, graph, db):
+    print("Loading users...\nSize: ", len(nodes), "\n")
+    start = time.time()
+    for row in nodes.iterrows():
+        id = row[0]
+        row = row[1]
+        user = graph.createVertex(
+            "User",
+            {
+                "_key": str(id),
+                "first_name": row["first_name"],
+                "last_name": row["last_name"],
+                "email": row["email"],
+                "phone": row["phone"],
+                "birth_date": row["birthDate"],
+                "gender": row["gender"],
+            },
+        )
+        load_movie_genre_edges(row, user._id, graph, db)
+        load_movie_edges(row, user._id, graph, db)
+        load_color_edges(row, user._id, graph, db)
+        load_university_edges(row, user._id, graph, db)
+        load_city_edges(row, user._id, graph, db)
+
+    end = time.time()
+    print("Users loaded in ", end - start, " seconds\n")
+
+
+def load_basic_nodes(nodes: pd.DataFrame, my_graph, db):
     load_movie_genres(parse_movie_generes(nodes), my_graph)
     load_colors(nodes["favourite_color"].dropna().unique().tolist(), my_graph)
     load_movies(nodes["favourite_movie"].dropna().unique().tolist(), my_graph)
@@ -107,3 +138,92 @@ def load_basic_nodes(nodes: pd.DataFrame, my_graph):
         my_graph,
     )
     load_cities(parse_cities(nodes), my_graph)
+    load_users(nodes, my_graph, db)
+
+
+def load_country_city_edges(db, graph, cc_df):
+    countries_query = "FOR country IN Country RETURN country"
+    cities_query = "FOR city IN City RETURN city"
+
+    countries = db.AQLQuery(countries_query, rawResults=True)
+    cities = db.AQLQuery(cities_query, rawResults=True)
+
+    print("Loading country-city edges...\n")
+    start = time.time()
+    for country in countries:
+        list_of_cities = cc_df[cc_df["country"] == country["name"]]["city"].tolist()
+        for city in cities:
+            if city["name"] in list_of_cities:
+                graph.createEdge("LocatedIn", country["_id"], city["_id"], {})
+
+    end = time.time()
+    print("Country-city edges loaded in ", end - start, " seconds\n")
+
+
+def load_user_edges(edges: pd.DataFrame, graph):
+    pref = "User/"
+    edges.apply(
+        lambda row: graph.createEdge(
+            "Likes", pref + str(row["src"]), pref + str(row["dest"]), {}
+        ),
+        axis=1,
+    )
+
+
+def load_movie_edges(user, user_id, graph, db):
+    if pd.isnull(user["favourite_movie"]):
+        return
+    query = "FOR movie IN Movie FILTER movie.title == @movie_title RETURN movie._id"
+    movie_id = db.AQLQuery(
+        query, bindVars={"movie_title": user["favourite_movie"]}, rawResults=True
+    )
+    graph.createEdge("IntMovie", user_id, movie_id[0], {})
+
+
+def load_color_edges(user, user_id, graph, db):
+    if pd.isnull(user["favourite_color"]):
+        return
+    query = "FOR color IN Color FILTER color.name == @color_name RETURN color._id"
+    color_id = db.AQLQuery(
+        query, bindVars={"color_name": user["favourite_color"]}, rawResults=True
+    )
+    graph.createEdge("IntColor", user_id, color_id[0], {})
+
+
+def load_university_edges(user, user_id, graph, db):
+    if pd.isnull(user["university"]):
+        return
+    query = "FOR university IN University FILTER university.name == @university_name RETURN university._id"
+    university_id = db.AQLQuery(
+        query, bindVars={"university_name": user["university"]}, rawResults=True
+    )
+    graph.createEdge("StudiesAt", user_id, university_id[0], {})
+
+
+def load_city_edges(user, user_id, graph, db):
+    query = "FOR city IN City FILTER city.name == @city_name RETURN city._id"
+    city_id = db.AQLQuery(query, bindVars={"city_name": user["city"]}, rawResults=True)
+    graph.createEdge("LivesIn", user_id, city_id[0], {})
+
+
+def load_movie_genre_edges(user, user_id, graph, db):
+    genres = user["movie_genres"].split(",")
+
+    genres = list(
+        map(
+            lambda x: x.replace("[", "")
+            .replace("]", "")
+            .replace("'", "")
+            .replace(" ", ""),
+            genres,
+        )
+    )
+
+    query = (
+        "FOR genre IN MovieCategory FILTER genre.name == @genre_name RETURN genre._id"
+    )
+
+    for genre in genres:
+        genre_id = db.AQLQuery(query, bindVars={"genre_name": genre}, rawResults=True)
+        if genre_id:
+            graph.createEdge("IntMovieCategory", user_id, genre_id[0], {})
