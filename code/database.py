@@ -162,12 +162,16 @@ def load_country_city_edges(db, graph, cc_df):
 
 def load_user_edges(edges: pd.DataFrame, graph):
     pref = "User/"
+    start = time.time()
+    print("Loading user edges...\n" + "Size: ", len(edges), "\n")
     edges.apply(
         lambda row: graph.createEdge(
             "Likes", pref + str(row["src"]), pref + str(row["dest"]), {}
         ),
         axis=1,
     )
+    end = time.time()
+    print("User edges loaded in ", end - start, " seconds\n")
 
 
 def load_movie_edges(user, user_id, graph, db):
@@ -227,3 +231,16 @@ def load_movie_genre_edges(user, user_id, graph, db):
         genre_id = db.AQLQuery(query, bindVars={"genre_name": genre}, rawResults=True)
         if genre_id:
             graph.createEdge("IntMovieCategory", user_id, genre_id[0], {})
+
+def load_matches(matches: pd.DataFrame, graph):
+    pref = "User/"
+    start = time.time()
+    print("Loading matches...\n" + "Size: ", len(matches), "\n")
+    matches.apply(
+        lambda row: graph.createEdge(
+            "Matches", pref + str(row["src"]), pref + str(row["dest"]), {}
+        ),
+        axis=1,
+    )
+    end = time.time()
+    print("Matches loaded in ", end - start, " seconds\n")

@@ -62,3 +62,10 @@ Vogliamo ottenere tutte le città che si trovano in Australia.
 ``` AQL
 FOR city IN 1..1 OUTBOUND "Country/AU" LocatedIn RETURN city
 ```
+
+``` AQL
+FOR v, e, p IN 1..1 OUTBOUND "User/123" GRAPH SoulSyncGraph RETURN { "edge": e, "destination": v }
+FOR user IN 1..1 ANY "User/123" Matches RETURN user
+FOR user IN Matches FILTER  user._from == "User/123" OR user._to == "User/123" RETURN user
+FOR u IN User FILTER u._key == "123" RETURN u
+```
