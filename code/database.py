@@ -114,7 +114,7 @@ def load_users(nodes: pd.DataFrame, graph, db):
                 "birth_date": row["birthDate"],
                 "gender": row["gender"],
                 "latitude": row["lat"],
-                "longitude": row["long"]
+                "longitude": row["long"],
             },
         )
         load_movie_genre_edges(row, user._id, graph, db)
@@ -166,12 +166,11 @@ def load_user_edges(edges: pd.DataFrame, graph):
     pref = "User/"
     start = time.time()
     print("Loading user edges...\n" + "Size: ", len(edges), "\n")
-    edges.apply(
-        lambda row: graph.createEdge(
-            "Likes", pref + str(row["src"]), pref + str(row["dest"]), {}
-        ),
-        axis=1,
-    )
+    edges_list = list(zip(edges.src, edges.dest))
+    for i in range(len(edges_list)):
+        graph.createEdge(
+            "Likes", pref + str(edges_list[i][0]), pref + str(edges_list[i][1]), {}
+        )
     end = time.time()
     print("User edges loaded in ", end - start, " seconds\n")
 
@@ -234,15 +233,15 @@ def load_movie_genre_edges(user, user_id, graph, db):
         if genre_id:
             graph.createEdge("IntMovieCategory", user_id, genre_id[0], {})
 
+
 def load_matches(matches: pd.DataFrame, graph):
     pref = "User/"
     start = time.time()
     print("Loading matches...\n" + "Size: ", len(matches), "\n")
-    matches.apply(
-        lambda row: graph.createEdge(
-            "Matches", pref + str(row["src"]), pref + str(row["dest"]), {}
-        ),
-        axis=1,
-    )
+    edges_list = list(zip(matches.src, matches.dest))
+    for i in range(len(edges_list)):
+        graph.createEdge(
+            "Matches", pref + str(edges_list[i][0]), pref + str(edges_list[i][1]), {}
+        )
     end = time.time()
     print("Matches loaded in ", end - start, " seconds\n")

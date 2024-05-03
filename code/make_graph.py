@@ -11,7 +11,8 @@ class SoulSyncGraph(Graph):
         EdgeDefinition("IntMovieCategory", fromCollections=["User"], toCollections=["MovieCategory"]),
         EdgeDefinition("LivesIn", fromCollections=["User"], toCollections=["City"]),
         EdgeDefinition("LocatedIn", fromCollections=["City"], toCollections=["Country"]),
-        EdgeDefinition("StudiesAt", fromCollections=["User"], toCollections=["University"]),
-        EdgeDefinition("Category", fromCollections=["Movie"], toCollections=["MovieCategory"])
+        EdgeDefinition("StudiesAt", fromCollections=["User"], toCollections=["University"])
         ]
+    #     EdgeDefinition("Category", fromCollections=["Movie"], toCollections=["MovieCategory"])
+    #     ]
     _orphanedCollections = []
