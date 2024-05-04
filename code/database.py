@@ -31,45 +31,49 @@ def create_db():
 
 # Load Data
 def load_movies(movies: list, graph):
-    print("Loading movies...\nSize: ", len(movies), "\n")
+    # print("Loading movies...\nSize: ", len(movies), "\n")
     start = time.time()
     for movie in movies:
         graph.createVertex("Movie", {"title": movie})
     end = time.time()
-    print("Movies loaded in ", end - start, " seconds\n")
+    # print("Movies loaded in ", end - start, " seconds\n")
+    return end - start
 
 
 def load_movie_genres(movie_genres: list, graph):
-    print("Loading movie genres...\nSize: ", len(movie_genres), "\n")
+    # print("Loading movie genres...\nSize: ", len(movie_genres), "\n")
     start = time.time()
     for genre in movie_genres:
         if genre == "nan" or genre == "(nogenreslisted)":
             continue
         graph.createVertex("MovieCategory", {"_key": genre, "name": genre})
     end = time.time()
-    print("Movie genres loaded in ", end - start, " seconds\n")
+    # print("Movie genres loaded in ", end - start, " seconds\n")
+    return end - start
 
 
 def load_colors(colors: list, graph):
-    print("Loading colors...\nSize: ", len(colors), "\n")
+    # print("Loading colors...\nSize: ", len(colors), "\n")
     start = time.time()
     for color in colors:
         graph.createVertex("Color", {"_key": color, "name": color})
     end = time.time()
-    print("Colors loaded in ", end - start, " seconds\n")
+    # print("Colors loaded in ", end - start, " seconds\n")
+    return end - start
 
 
 def load_universities(universities: list, graph):
-    print("Loading universities...\nSize: ", len(universities), "\n")
+    # print("Loading universities...\nSize: ", len(universities), "\n")
     start = time.time()
     for university in universities:
         graph.createVertex("University", {"name": university})
     end = time.time()
-    print("Universities loaded in ", end - start, " seconds\n")
+    # print("Universities loaded in ", end - start, " seconds\n")
+    return end - start
 
 
 def load_cities(cities: dict, graph):
-    print("Loading cities...\nSize: ", len(cities), "\n")
+    # print("Loading cities...\nSize: ", len(cities), "\n")
     start = time.time()
     for city in cities:
         city_info = cities[city]
@@ -78,11 +82,12 @@ def load_cities(cities: dict, graph):
             {"name": city},
         )
     end = time.time()
-    print("Cities loaded in ", end - start, " seconds\n")
+    # print("Cities loaded in ", end - start, " seconds\n")
+    return end - start
 
 
 def load_countries(countries: pd.DataFrame, graph):
-    print("Loading countries...\nSize: ", len(countries), "\n")
+    # print("Loading countries...\nSize: ", len(countries), "\n")
     start = time.time()
     for row in countries.iterrows():
         row = row[1]
@@ -94,11 +99,12 @@ def load_countries(countries: pd.DataFrame, graph):
             {"_key": code, "name": name, "code": code, "continent": continent},
         )
     end = time.time()
-    print("Countries loaded in ", end - start, " seconds\n")
+    # print("Countries loaded in ", end - start, " seconds\n")
+    return end - start
 
 
 def load_users(nodes: pd.DataFrame, graph, db):
-    print("Loading users...\nSize: ", len(nodes), "\n")
+    # print("Loading users...\nSize: ", len(nodes), "\n")
     start = time.time()
     for row in nodes.iterrows():
         id = row[0]
@@ -124,7 +130,8 @@ def load_users(nodes: pd.DataFrame, graph, db):
         load_city_edges(row, user._id, graph, db)
 
     end = time.time()
-    print("Users loaded in ", end - start, " seconds\n")
+    # print("Users loaded in ", end - start, " seconds\n")
+    return end - start
 
 
 def load_basic_nodes(nodes: pd.DataFrame, my_graph, db):
@@ -150,7 +157,7 @@ def load_country_city_edges(db, graph, cc_df):
     countries = db.AQLQuery(countries_query, rawResults=True)
     cities = db.AQLQuery(cities_query, rawResults=True)
 
-    print("Loading country-city edges...\n")
+    # print("Loading country-city edges...\n")
     start = time.time()
     for country in countries:
         list_of_cities = cc_df[cc_df["country"] == country["name"]]["city"].tolist()
@@ -159,20 +166,22 @@ def load_country_city_edges(db, graph, cc_df):
                 graph.createEdge("LocatedIn", country["_id"], city["_id"], {})
 
     end = time.time()
-    print("Country-city edges loaded in ", end - start, " seconds\n")
+    # print("Country-city edges loaded in ", end - start, " seconds\n")
+    return end - start
 
 
 def load_user_edges(edges: pd.DataFrame, graph):
     pref = "User/"
     start = time.time()
-    print("Loading user edges...\n" + "Size: ", len(edges), "\n")
+    # print("Loading user edges...\n" + "Size: ", len(edges), "\n")
     edges_list = list(zip(edges.src, edges.dest))
     for i in range(len(edges_list)):
         graph.createEdge(
             "Likes", pref + str(edges_list[i][0]), pref + str(edges_list[i][1]), {}
         )
     end = time.time()
-    print("User edges loaded in ", end - start, " seconds\n")
+    # print("User edges loaded in ", end - start, " seconds\n")
+    return end - start
 
 
 def load_movie_edges(user, user_id, graph, db):
@@ -237,11 +246,17 @@ def load_movie_genre_edges(user, user_id, graph, db):
 def load_matches(matches: pd.DataFrame, graph):
     pref = "User/"
     start = time.time()
-    print("Loading matches...\n" + "Size: ", len(matches), "\n")
+    # print("Loading matches...\n" + "Size: ", len(matches), "\n")
     edges_list = list(zip(matches.src, matches.dest))
     for i in range(len(edges_list)):
         graph.createEdge(
             "Matches", pref + str(edges_list[i][0]), pref + str(edges_list[i][1]), {}
         )
     end = time.time()
-    print("Matches loaded in ", end - start, " seconds\n")
+    # print("Matches loaded in ", end - start, " seconds\n")
+    return end - start
+
+
+def drop_all(db):
+    db.dropAllCollections()
+    db.reload()
