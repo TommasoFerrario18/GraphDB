@@ -4,30 +4,44 @@ from utils import *
 from pyArango.connection import *
 
 
-# Create a database and all the collections and graphs needed
-def create_db():
-    # Create a connection to the database
-    conn = Connection()
+def create_database(
+    arangoURL=["http://localhost:8529"],
+    numberOfShards=1,
+    replicationFactor=1,
+    writeConcern=1,
+    dbName="SoulSync",
+    username=None,
+    password=None,
+):
+    if username and password:
+        conn = Connection(
+            arangoURL=arangoURL,
+            username=username,
+            password=password,
+        )
+    else:
+        conn = Connection(arangoURL=arangoURL)
 
-    # Create the database
     try:
-        conn.createDatabase(name="SoulSync")
+        conn.createDatabase(name=dbName)
     except CreationError:
         print("Couldn't create database, it probably already exists")
         pass
 
-    # Connect to the database
-    db = conn["SoulSync"]
+    db = conn[dbName]
 
-    # Create the graph
     try:
-        db.createGraph("SoulSyncGraph")
+        db.createGraph(
+            "SoulSyncGraph",
+            numberOfShards=numberOfShards,
+            replicationFactor=replicationFactor,
+            writeConcern=writeConcern,
+        )
     except CreationError:
         print("Couldn't create graph, it probably already exist")
         pass
 
     return db, db.graphs["SoulSyncGraph"]
-
 
 # Load Data
 def load_movies(movies: list, graph):
@@ -217,7 +231,8 @@ def load_university_edges(user, user_id, graph, db):
 def load_city_edges(user, user_id, graph, db):
     query = "FOR city IN City FILTER city.name == @city_name RETURN city._id"
     city_id = db.AQLQuery(query, bindVars={"city_name": user["city"]}, rawResults=True)
-    graph.createEdge("LivesIn", user_id, city_id[0], {})
+    if city_id:
+        graph.createEdge("LivesIn", user_id, city_id[0], {})
 
 
 def load_movie_genre_edges(user, user_id, graph, db):

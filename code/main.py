@@ -6,8 +6,6 @@ from make_graph import SoulSyncGraph
 import pandas as pd
 from database import *
 
-# from load_db import *
-
 
 def fill_db(
     users: pd.DataFrame, edges: pd.DataFrame, matches: pd.DataFrame, graph, db: Database
@@ -18,7 +16,7 @@ def fill_db(
     load_matches(matches, graph)
 
 
-db, my_graph = create_db()
+db, my_graph = create_database()
 
 users = pd.read_csv("./data/nodes.csv").drop(["Unnamed: 0"], axis=1)
 edges = pd.read_csv("./data/edges.csv")
