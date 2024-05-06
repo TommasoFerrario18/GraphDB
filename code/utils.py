@@ -1,5 +1,5 @@
 import pandas as pd
-# from scipy import stats
+from scipy import stats
 from tqdm import tqdm
 from database import *
 
@@ -25,25 +25,25 @@ def parse_movie_generes(nodes: pd.DataFrame) -> list:
     return pd.Series(flat_list).unique().tolist()
 
 
-# def parse_cities(nodes: pd.DataFrame) -> dict[str, pd.Series]:
-#     """
-#     Parses the cities from the given DataFrame of nodes.
+def parse_cities(nodes: pd.DataFrame) -> dict[str, pd.Series]:
+    """
+    Parses the cities from the given DataFrame of nodes.
 
-#     Args:
-#         nodes: DataFrame containing the nodes.
+    Args:
+        nodes: DataFrame containing the nodes.
 
-#     Returns:
-#         dict: Dictionary where keys are cities and values are trimmed mean of lat and long.
-#     """
-#     cities = nodes["city"].unique().tolist()
-#     city_dict = {}
-#     for city in cities:
-#         city_info = nodes[nodes["city"] == city]
-#         city_info = city_info[["city", "lat", "long"]]
+    Returns:
+        dict: Dictionary where keys are cities and values are trimmed mean of lat and long.
+    """
+    cities = nodes["city"].unique().tolist()
+    city_dict = {}
+    for city in cities:
+        city_info = nodes[nodes["city"] == city]
+        city_info = city_info[["city", "lat", "long"]]
 
-#         city_dict[city] = city_info.groupby("city").apply(stats.trim_mean, 0.25)
+        city_dict[city] = city_info.groupby("city").apply(stats.trim_mean, 0.25)
 
-#     return city_dict
+    return city_dict
 
 
 def read_all_csv():

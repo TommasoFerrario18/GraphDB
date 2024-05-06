@@ -6,6 +6,7 @@ from make_graph import SoulSyncGraph
 from utils import *
 import pandas as pd
 from database import *
+from analysis import *
 
 if __name__ == "__main__":
     nodes, edges, matches = read_all_csv()

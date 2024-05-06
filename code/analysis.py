@@ -17,7 +17,7 @@ def load_analysis_nodes(
         ]
     )
 
-    N = 10
+    N = 1
     for i in tqdm(range(N)):
         row = {}
         row["movie_category"] = load_movie_genres(parse_movie_generes(nodes), graph)
@@ -37,7 +37,7 @@ def load_analysis_nodes(
             .drop_duplicates(),
             graph,
         )
-        row["city"] = load_cities(nodes, graph)
+        row["city"] = load_cities(parse_cities(nodes), graph)
         row["user"] = load_users(nodes, graph, db)
         row["located_in"] = load_country_city_edges(
             db, graph, nodes[["city", "country"]].drop_duplicates()
@@ -66,7 +66,7 @@ def load_analysis_edges(
 
     qty = [10, 100, 1000, 10000, 50000, 100000, 200000]
 
-    for i in tqdm(range(qty)):
+    for i in tqdm(range(1)):
         row = {}
         row["likes"] = load_user_edges(edges, graph)
         row["matches"] = load_matches(matches, graph)

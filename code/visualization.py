@@ -1,8 +1,9 @@
 import dash
-import dash_core_components as dcc
-import dash_html_components as html
+from dash import dcc
+from dash import html
 import plotly.graph_objs as go
 from dash.dependencies import Input, Output
+import plotly.express as px
 import pandas as pd
 
 external_stylesheets = ["https://codepen.io/chriddyp/pen/bWLwgP.css"]
@@ -68,10 +69,16 @@ def render_content(tab):
 
 @app.callback(Output("graph", "figure"), [Input("column-selector", "value")])
 def update_graph(selected_column):
-    trace = go.Scatter(x=df.index, y=df[selected_column], name=selected_column)
+    trace = go.Scatter(
+        x=['Centralized', "Distribuited"],
+        y=df[selected_column],
+        error_y=dict(type="data", array=[df[selected_column].std()], visible=True),
+        name=selected_column,
+        mode="markers",
+    )
     layout = go.Layout(
         title=f"Grafico di {selected_column}",
-        xaxis=dict(title="Numero di iterazioni"),
+        xaxis=dict(title="Versione"),
         yaxis=dict(title="Tempo impiegato (secondi)"),
     )
     return {"data": [trace], "layout": layout}
