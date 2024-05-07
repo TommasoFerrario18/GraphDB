@@ -16,7 +16,7 @@ def parse_movie_generes(nodes: pd.DataFrame) -> list:
     rows = nodes["movie_genres"].apply(lambda x: x.split(","))
     rows = rows.apply(
         lambda x: [
-            i.replace("[", "").replace("]", "").replace("'", "").replace(" ", "")
+            i.replace("[", "").replace("]", "").replace(" ", "")
             for i in x
         ]
     )

@@ -319,10 +319,14 @@ def drop_all(db):
     db.dropAllCollections()
     db.reload()
 
+
 def clear_all_collections(db):
     """
     Clears all the collections in the database.
     """
-    for collection in db.collections():
-        if collection.name != "_graphs":
-            collection.truncate()
+    print("Clearing all collections...")
+    for collection in db.collections:
+        if collection[0] == "_":
+            continue
+        print(f"Clearing collection {collection}")
+        db[collection].truncate()
