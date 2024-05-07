@@ -1,7 +1,6 @@
 import pandas as pd
 from scipy import stats
 from tqdm import tqdm
-from database import *
 
 
 def parse_movie_generes(nodes: pd.DataFrame) -> list:
@@ -56,10 +55,3 @@ def read_all_csv():
     return users, edges, matches
 
 
-def clear_all_collections(db):
-    """
-    Clears all the collections in the database.
-    """
-    for collection in db.collections():
-        if collection.name != "_graphs":
-            collection.truncate()
