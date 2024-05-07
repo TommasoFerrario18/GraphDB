@@ -69,6 +69,15 @@ def load_movie_genres(movie_genres: list, graph):
     return end - start
 
 
+def load_continents(continents: list, graph):
+    # print("Loading continents...\nSize: ", len(continents), "\n")
+    start = time.time()
+    for continent in continents:
+        graph.createVertex("Continent", {"_key":continent, "name": continent}, waitForSync=False)
+    end = time.time()
+    # print("Continents loaded in ", end - start, " seconds\n")
+    return end - start
+
 def load_colors(colors: list, graph):
     # print("Loading colors...\nSize: ", len(colors), "\n")
     start = time.time()
@@ -107,10 +116,9 @@ def load_countries(countries: pd.DataFrame, graph):
         row = row[1]
         name = row["country"]
         code = row["country_code"]
-        continent = row["continent"]
         graph.createVertex(
             "Country",
-            {"_key": code, "name": name, "code": code, "continent": continent},
+            {"_key": code, "name": name, "code": code},
             waitForSync=False,
         )
     end = time.time()
@@ -152,11 +160,12 @@ def load_users(nodes: pd.DataFrame, graph, db):
 
 def load_basic_nodes(nodes: pd.DataFrame, my_graph, db):
     load_movie_genres(parse_movie_generes(nodes), my_graph)
+    load_continents(nodes["continent"].dropna().unique().tolist(), my_graph)
     load_colors(nodes["favourite_color"].dropna().unique().tolist(), my_graph)
     load_movies(nodes["favourite_movie"].dropna().unique().tolist(), my_graph)
     load_universities(nodes["university"].dropna().unique().tolist(), my_graph)
     load_countries(
-        nodes.groupby(["country", "continent", "country_code"])
+        nodes.groupby(["country", "country_code"])
         .size()
         .reset_index()
         .drop_duplicates(),
@@ -165,6 +174,26 @@ def load_basic_nodes(nodes: pd.DataFrame, my_graph, db):
     load_cities(parse_cities(nodes), my_graph)
     load_users(nodes, my_graph, db)
 
+def load_country_continent_edges(db, graph, cc_df):
+    continents_query = "FOR continent IN Continent RETURN continent"
+    countries_query = "FOR country IN Country RETURN country"
+
+    continents = db.AQLQuery(continents_query, rawResults=True)
+    countries = db.AQLQuery(countries_query, rawResults=True)
+
+    # print("Loading country-continent edges...\n")
+    start = time.time()
+    for continent in continents:
+        list_of_countries = cc_df[cc_df["continent"] == continent["name"]]["country"].tolist()
+        for country in countries:
+            if country["name"] in list_of_countries:
+                graph.createEdge(
+                    "LocatedIn", continent["_id"], country["_id"], {}, waitForSync=False
+                )
+
+    end = time.time()
+    # print("Country-continent edges loaded in ", end - start, " seconds\n")
+    return end - start
 
 def load_country_city_edges(db, graph, cc_df):
     countries_query = "FOR country IN Country RETURN country"

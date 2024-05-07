@@ -12,6 +12,7 @@ def fill_db(
 ):
     load_basic_nodes(users, graph, db)
     load_user_edges(edges, graph)
+    load_country_continent_edges(db, graph, users[["country", "continent"]].drop_duplicates())
     load_country_city_edges(db, graph, users[["city", "country"]].drop_duplicates())
     load_matches(matches, graph)
 

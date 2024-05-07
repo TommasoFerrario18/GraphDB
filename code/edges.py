@@ -35,3 +35,6 @@ class StudiesAt(Edges):  # University - User
 
 class LocatedIn(Edges):  # City - Country
     _fields = {}
+
+class CountryLocatedIn(Edges):  # Country - Continent
+    _fields = {}

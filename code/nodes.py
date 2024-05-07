@@ -28,7 +28,10 @@ class City(Collection):
 
 
 class Country(Collection):
-    _fields = {"name": Field(), "code": Field(), "continent": Field()}
+    _fields = {"name": Field(), "code": Field()}
+
+class Continent(Collection):
+    _fields = {"name": Field()}
 
 
 class University(Collection):
