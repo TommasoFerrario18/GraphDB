@@ -61,8 +61,8 @@ def load_analysis_nodes(
             times_df = pd.concat(
                 [times_df, pd.Series(row).to_frame().T], ignore_index=True
             )
-
-            clear_all_collections(db)
+            if i<N-1 or j<len(qty)-1:
+                clear_all_collections(db)
 
     times_df = times_df.set_index(pd.Index(list(itertools.product(range(N), qty))))
     times_df.to_csv(path)
@@ -94,9 +94,9 @@ def load_analysis_edges(
             times_df = pd.concat(
                 [times_df, pd.Series(row).to_frame().T], ignore_index=True
             )
-
-            db.collections["Likes"].truncate()
-            db.collections["Matches"].truncate()
+            if i<N-1 or j<len(qty)-1:
+                db.collections["Likes"].truncate()
+                db.collections["Matches"].truncate()
 
     times_df = times_df.set_index(pd.Index(list(itertools.product(range(N), qty))))
     times_df.to_csv(path)

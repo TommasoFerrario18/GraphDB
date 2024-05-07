@@ -21,10 +21,6 @@ class IntColor(Edges):  # User - Color
     _fields = {}
 
 
-# class Category(Edges):  # Movie - MovieCategory
-#     _fields = {}
-
-
 class LivesIn(Edges):  # City - User
     _fields = {}
 

@@ -4,23 +4,23 @@ from utils import *
 from pyArango.connection import *
 
 
-def create_database(
-    arangoURL=["http://localhost:8529"],
-    numberOfShards=1,
-    replicationFactor=1,
-    writeConcern=1,
-    dbName="SoulSync",
-    username=None,
-    password=None,
-):
-    if username and password:
-        conn = Connection(
-            arangoURL=arangoURL,
-            username=username,
-            password=password,
-        )
-    else:
-        conn = Connection(arangoURL=arangoURL)
+def create_database(typeDB = 0):
+
+    if typeDB == 0:
+        arangoURL=["http://localhost:8529"]
+        numberOfShards=1
+        replicationFactor=1
+        writeConcern=1
+        dbName="SoulSync"
+    elif typeDB == 1:
+        arangoURL=["http://localhost:8000", "http://localhost:8001"]
+        dbName="SoulSync"
+        numberOfShards=3
+        replicationFactor=2
+        writeConcern=1
+
+
+    conn = Connection(arangoURL=arangoURL)
 
     try:
         conn.createDatabase(name=dbName)

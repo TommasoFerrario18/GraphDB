@@ -6,36 +6,27 @@ from make_graph import SoulSyncGraph
 import pandas as pd
 from database import *
 from insert import *
+from analysis import *
 
+typeDB = 0 # 0 for centralized, 1 for distributed 
 
-def fill_db(
-    users: pd.DataFrame, edges: pd.DataFrame, matches: pd.DataFrame, graph, db: Database
-):
-    load_basic_nodes(users, graph, db)
-    load_user_edges(edges, graph)
-    load_country_continent_edges(db, graph, users[["country", "continent"]].drop_duplicates())
-    load_country_city_edges(db, graph, users[["city", "country"]].drop_duplicates())
-    load_matches(matches, graph)
+nodes, edges, matches = read_all_csv()
 
+if typeDB == 0:
+    path_edges = "./results/loading_edges_cent.csv"
+    path_nodes = "./results/loading_nodes_cent.csv"
+elif typeDB == 1:
+    path_edges = "./results/loading_edges_dist.csv"
+    path_nodes = "./results/loading_nodes_dist.csv"
 
-db, my_graph = create_database()
+db, graph = create_database(typeDB) 
 
-users = pd.read_csv("./data/nodes.csv").drop(["Unnamed: 0"], axis=1)
-edges = pd.read_csv("./data/edges.csv")
-matches = pd.read_csv("./data/matches.csv")
+print("Database created successfully")
 
-# fill_db(users, edges, matches, my_graph, db)
+load_analysis_nodes(nodes, db, graph, path_nodes)
 
-# for collection in db.collections:
-#     if collection[0] == "_":
-#         continue
-#     print(collection)
+print("Node Analysis loaded successfully")
 
-# ris = load_nodes_batch(users, db)
-ris = {}
+load_analysis_edges(edges, matches, db, graph, path_edges)
 
-ris['countries_edge'] = load_country_city_edges_batches(db, users[["city", "country"]].drop_duplicates())
-ris['Likes'] = load_user_edges_batch(edges, db)
-ris['matches'] = load_matches_batch(matches, db)
-
-print(ris)
+print("Edge Analysis loaded successfully")

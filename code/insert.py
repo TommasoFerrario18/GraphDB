@@ -6,7 +6,6 @@ from concurrent.futures import ThreadPoolExecutor
 
 batch_size = 100
 
-
 def insert_batch(batch, collection):
     collection.bulkSave(batch)
 
@@ -86,6 +85,19 @@ def load_universities_batch(universities: list, db):
     return end - start, new_universities
 
 
+def load_continent_batch(continent, db):
+    print("Loading continent...\nSize: ", len(continent), "\n")
+    docs = []
+    for cont in continent:
+        docs.append({"_key": cont, "name": cont})
+
+    start = time.time()
+    insert_batch(docs, db["Continent"])
+    end = time.time()
+    print("Continent loaded in ", end - start, " seconds\n")
+    return end - start
+
+
 def load_cities_batch(cities: dict, db):
     print("Loading cities...\nSize: ", len(cities), "\n")
 
@@ -112,16 +124,24 @@ def load_cities_batch(cities: dict, db):
 
 def load_countries_batch(countries: pd.DataFrame, db):
     print("Loading countries...\nSize: ", len(countries), "\n")
+    
     docs = []
+    continent_docs = []
+
     for row in countries.iterrows():
         row = row[1]
         docs.append(
             {
                 "_key": row["country_code"],
                 "name": row["country"],
-                "code": row["country_code"],
-                "continent": row["continent"],
+                "code": row["country_code"]
             }
+        )
+    
+    for row in countries[['country_code', 'continent']].dropna().drop_duplicates().iterrows():
+        row = row[1]
+        continent_docs.append(
+            {"_from": "Country/" + row["country_code"], "_to": "Continent/" + row["continent"]}
         )
 
     batches = [docs[i : i + batch_size] for i in range(0, len(docs), batch_size)]
@@ -134,7 +154,10 @@ def load_countries_batch(countries: pd.DataFrame, db):
         for f in features:
             f.result()
     end = time.time()
+
+    insert_batch(continent_docs, db["CountryLocatedIn"])
     print("Countries loaded in ", end - start, " seconds\n")
+
     return end - start
 
 
@@ -448,4 +471,4 @@ def load_matches_batch(matches: pd.DataFrame, db):
 
     end = time.time()
     print("Matches loaded in ", end - start, " seconds\n")
-    return end - start
+    return end - start     
