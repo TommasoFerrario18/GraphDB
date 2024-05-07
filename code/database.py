@@ -4,21 +4,20 @@ from utils import *
 from pyArango.connection import *
 
 
-def create_database(typeDB = 0):
+def create_database(typeDB=0):
 
     if typeDB == 0:
-        arangoURL=["http://localhost:8529"]
-        numberOfShards=1
-        replicationFactor=1
-        writeConcern=1
-        dbName="SoulSync"
+        arangoURL = ["http://localhost:8529"]
+        numberOfShards = 1
+        replicationFactor = 1
+        writeConcern = 1
+        dbName = "SoulSync"
     elif typeDB == 1:
-        arangoURL=["http://localhost:8000", "http://localhost:8001"]
-        dbName="SoulSync"
-        numberOfShards=3
-        replicationFactor=2
-        writeConcern=1
-
+        arangoURL = ["http://localhost:8000", "http://localhost:8001"]
+        dbName = "SoulSync"
+        numberOfShards = 3
+        replicationFactor = 2
+        writeConcern = 1
 
     conn = Connection(arangoURL=arangoURL)
 
@@ -73,10 +72,13 @@ def load_continents(continents: list, graph):
     # print("Loading continents...\nSize: ", len(continents), "\n")
     start = time.time()
     for continent in continents:
-        graph.createVertex("Continent", {"_key":continent, "name": continent}, waitForSync=False)
+        graph.createVertex(
+            "Continent", {"_key": continent, "name": continent}, waitForSync=False
+        )
     end = time.time()
     # print("Continents loaded in ", end - start, " seconds\n")
     return end - start
+
 
 def load_colors(colors: list, graph):
     # print("Loading colors...\nSize: ", len(colors), "\n")
@@ -98,11 +100,10 @@ def load_universities(universities: list, graph):
     return end - start
 
 
-def load_cities(cities: dict, graph):
+def load_cities(cities, graph):
     # print("Loading cities...\nSize: ", len(cities), "\n")
     start = time.time()
     for city in cities:
-        city_info = cities[city]
         graph.createVertex("City", {"name": city}, waitForSync=False)
     end = time.time()
     # print("Cities loaded in ", end - start, " seconds\n")
@@ -171,8 +172,9 @@ def load_basic_nodes(nodes: pd.DataFrame, my_graph, db):
         .drop_duplicates(),
         my_graph,
     )
-    load_cities(parse_cities(nodes), my_graph)
+    load_cities(nodes["city"].dropna().unique().tolist(), my_graph)
     load_users(nodes, my_graph, db)
+
 
 def load_country_continent_edges(db, graph, cc_df):
     continents_query = "FOR continent IN Continent RETURN continent"
@@ -184,7 +186,9 @@ def load_country_continent_edges(db, graph, cc_df):
     # print("Loading country-continent edges...\n")
     start = time.time()
     for continent in continents:
-        list_of_countries = cc_df[cc_df["continent"] == continent["name"]]["country"].tolist()
+        list_of_countries = cc_df[cc_df["continent"] == continent["name"]][
+            "country"
+        ].tolist()
         for country in countries:
             if country["name"] in list_of_countries:
                 graph.createEdge(
@@ -194,6 +198,7 @@ def load_country_continent_edges(db, graph, cc_df):
     end = time.time()
     # print("Country-continent edges loaded in ", end - start, " seconds\n")
     return end - start
+
 
 def load_country_city_edges(db, graph, cc_df):
     countries_query = "FOR country IN Country RETURN country"

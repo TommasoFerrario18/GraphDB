@@ -4,9 +4,7 @@ from insert import *
 import itertools
 
 
-def load_analysis_nodes(
-    nodes: pd.DataFrame, db, graph, path="./results/loading_nodes.csv"
-):
+def load_analysis_nodes(nodes: pd.DataFrame, db, path="./results/loading_nodes.csv"):
     times_df = pd.DataFrame(
         columns=[
             "city",
@@ -43,7 +41,9 @@ def load_analysis_nodes(
                 partial_nodes["university"].dropna().unique().tolist(), db
             )
 
-            row["city"], cities = load_cities_batch(parse_cities(partial_nodes), db)
+            row["city"], cities = load_cities_batch(
+                partial_nodes["city"].dropna().unique().tolist(), db
+            )
 
             row["country"] = load_countries_batch(
                 partial_nodes.groupby(["country", "continent", "country_code"])
@@ -61,7 +61,7 @@ def load_analysis_nodes(
             times_df = pd.concat(
                 [times_df, pd.Series(row).to_frame().T], ignore_index=True
             )
-            if i<N-1 or j<len(qty)-1:
+            if i < N - 1 or j < len(qty) - 1:
                 clear_all_collections(db)
 
     times_df = times_df.set_index(pd.Index(list(itertools.product(range(N), qty))))
@@ -72,7 +72,6 @@ def load_analysis_edges(
     edges: pd.DataFrame,
     matches: pd.DataFrame,
     db,
-    graph,
     path="./results/loading_edges.csv",
 ):
     times_df = pd.DataFrame(
@@ -94,7 +93,7 @@ def load_analysis_edges(
             times_df = pd.concat(
                 [times_df, pd.Series(row).to_frame().T], ignore_index=True
             )
-            if i<N-1 or j<len(qty)-1:
+            if i < N - 1 or j < len(qty) - 1:
                 db.collections["Likes"].truncate()
                 db.collections["Matches"].truncate()
 

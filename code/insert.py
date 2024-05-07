@@ -6,6 +6,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 batch_size = 100
 
+
 def insert_batch(batch, collection):
     collection.bulkSave(batch)
 
@@ -98,7 +99,7 @@ def load_continent_batch(continent, db):
     return end - start
 
 
-def load_cities_batch(cities: dict, db):
+def load_cities_batch(cities, db):
     print("Loading cities...\nSize: ", len(cities), "\n")
 
     new_cities = {}
@@ -124,7 +125,7 @@ def load_cities_batch(cities: dict, db):
 
 def load_countries_batch(countries: pd.DataFrame, db):
     print("Loading countries...\nSize: ", len(countries), "\n")
-    
+
     docs = []
     continent_docs = []
 
@@ -134,14 +135,19 @@ def load_countries_batch(countries: pd.DataFrame, db):
             {
                 "_key": row["country_code"],
                 "name": row["country"],
-                "code": row["country_code"]
+                "code": row["country_code"],
             }
         )
-    
-    for row in countries[['country_code', 'continent']].dropna().drop_duplicates().iterrows():
+
+    for row in (
+        countries[["country_code", "continent"]].dropna().drop_duplicates().iterrows()
+    ):
         row = row[1]
         continent_docs.append(
-            {"_from": "Country/" + row["country_code"], "_to": "Continent/" + row["continent"]}
+            {
+                "_from": "Country/" + row["country_code"],
+                "_to": "Continent/" + row["continent"],
+            }
         )
 
     batches = [docs[i : i + batch_size] for i in range(0, len(docs), batch_size)]
@@ -323,79 +329,15 @@ def load_nodes_batch(nodes: pd.DataFrame, db):
         .drop_duplicates(),
         db,
     )
-    dict_results["cities"], cities = load_cities_batch(parse_cities(nodes), db)
+    dict_results["continent"] = load_continent_batch(
+        nodes["continent"].dropna().unique().tolist(), db
+    )
+    dict_results["cities"], cities = load_cities_batch(
+        nodes["city"].dropna().unique().tolist(), db
+    )
     dict_results["user"] = load_users_batch(nodes, db, movie, uni, cities)
 
     return dict_results
-
-
-def user_movie_edge(user, user_id, db):
-    if pd.isnull(user["favourite_movie"]):
-        return {}
-    query = "FOR movie IN Movie FILTER movie.title == @movie_title RETURN movie._id"
-    movie_id = db.AQLQuery(
-        query, bindVars={"movie_title": user["favourite_movie"]}, rawResults=True
-    )
-    if movie_id:
-        return {"_from": user_id, "_to": movie_id[0]}
-    return {}
-
-
-def user_color_edge(user, user_id, db):
-    if pd.isnull(user["favourite_color"]):
-        return {}
-    query = "FOR color IN Color FILTER color.name == @color_name RETURN color._id"
-    color_id = db.AQLQuery(
-        query, bindVars={"color_name": user["favourite_color"]}, rawResults=True
-    )
-    if color_id:
-        return {"_from": user_id, "_to": color_id[0]}
-    return {}
-
-
-def user_university_edge(user, user_id, db):
-    if pd.isnull(user["university"]):
-        return {}
-    query = "FOR university IN University FILTER university.name == @university_name RETURN university._id"
-    university_id = db.AQLQuery(
-        query, bindVars={"university_name": user["university"]}, rawResults=True
-    )
-    if university_id:
-        return {"_from": user_id, "_to": university_id[0]}
-    return {}
-
-
-def user_city_edge(user, user_id, db):
-    query = "FOR city IN City FILTER city.name == @city_name RETURN city._id"
-    city_id = db.AQLQuery(query, bindVars={"city_name": user["city"]}, rawResults=True)
-    if city_id:
-        return {"_from": user_id, "_to": city_id[0]}
-    return {}
-
-
-def user_movie_genres_edge(user, user_id, db):
-    genres = user["movie_genres"].split(",")
-
-    genres = list(
-        map(
-            lambda x: x.replace("[", "")
-            .replace("]", "")
-            .replace("'", "")
-            .replace(" ", ""),
-            genres,
-        )
-    )
-
-    query = (
-        "FOR genre IN MovieCategory FILTER genre.name == @genre_name RETURN genre._id"
-    )
-
-    edges = []
-
-    for genre in genres:
-        genre_id = db.AQLQuery(query, bindVars={"genre_name": genre}, rawResults=True)
-        if genre_id:
-            edges.append({"_from": user_id, "_to": genre_id[0]})
 
 
 def load_country_city_edges_batches(db, cc_df):
@@ -471,4 +413,4 @@ def load_matches_batch(matches: pd.DataFrame, db):
 
     end = time.time()
     print("Matches loaded in ", end - start, " seconds\n")
-    return end - start     
+    return end - start
