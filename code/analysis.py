@@ -1,6 +1,7 @@
 from utils import *
 from database import *
 from insert import *
+import itertools
 
 
 def load_analysis_nodes(
@@ -23,45 +24,47 @@ def load_analysis_nodes(
 
     N = 10
     for i in tqdm(range(N)):
-        # partial_nodes = nodes.head(qty[i])
-        partial_nodes = nodes
-        row = {}
-        row["movie"], movies = load_movies_batch(
-            partial_nodes["favourite_movie"].dropna().unique().tolist(), db
-        )
+        for j in tqdm(range(len(qty)), leave=False):
+            partial_nodes = nodes.head(qty[j])
+            row = {}
+            row["movie"], movies = load_movies_batch(
+                partial_nodes["favourite_movie"].dropna().unique().tolist(), db
+            )
 
-        row["movie_category"] = load_movie_genres_batch(
-            parse_movie_generes(partial_nodes), db
-        )
-        
-        row["color"] = load_colors_batch(
-            partial_nodes["favourite_color"].dropna().unique().tolist(), db
-        )
+            row["movie_category"] = load_movie_genres_batch(
+                parse_movie_generes(partial_nodes), db
+            )
 
-        row["university"], uni = load_universities_batch(
-            partial_nodes["university"].dropna().unique().tolist(), db
-        )
-        
-        row["city"], cities = load_cities_batch(parse_cities(partial_nodes), db)
-        
-        row["country"] = load_countries_batch(
-            partial_nodes.groupby(["country", "continent", "country_code"])
-            .size()
-            .reset_index()
-            .drop_duplicates(),
-            db
-        )
-        
-        row["user"] = load_users_batch(partial_nodes, db, movies, uni, cities)
-        row["located_in"] = load_country_city_edges_batches(
-            db, partial_nodes[["city", "country"]].drop_duplicates()
-        )
+            row["color"] = load_colors_batch(
+                partial_nodes["favourite_color"].dropna().unique().tolist(), db
+            )
 
-        times_df = pd.concat([times_df, pd.Series(row).to_frame().T], ignore_index=True)
-        if i != N - 1:
+            row["university"], uni = load_universities_batch(
+                partial_nodes["university"].dropna().unique().tolist(), db
+            )
+
+            row["city"], cities = load_cities_batch(parse_cities(partial_nodes), db)
+
+            row["country"] = load_countries_batch(
+                partial_nodes.groupby(["country", "continent", "country_code"])
+                .size()
+                .reset_index()
+                .drop_duplicates(),
+                db,
+            )
+
+            row["user"] = load_users_batch(partial_nodes, db, movies, uni, cities)
+            row["located_in"] = load_country_city_edges_batches(
+                db, partial_nodes[["city", "country"]].drop_duplicates()
+            )
+
+            times_df = pd.concat(
+                [times_df, pd.Series(row).to_frame().T], ignore_index=True
+            )
+
             clear_all_collections(db)
 
-    # times_df = times_df.set_index(pd.Index(qty))
+    times_df = times_df.set_index(pd.Index(list(itertools.product(range(N), qty))))
     times_df.to_csv(path)
 
 
@@ -83,15 +86,17 @@ def load_analysis_edges(
 
     N = 10
     for i in tqdm(range(N)):
-        row = {}
-        row["likes"] = load_user_edges_batch(edges, db)
-        row["matches"] = load_matches_batch(matches, db)
+        for j in tqdm(range(len(qty)), leave=False):
+            row = {}
+            row["likes"] = load_user_edges_batch(edges.head(qty[j]), db)
+            row["matches"] = load_matches_batch(matches.head(qty[j]), db)
 
-        times_df = pd.concat([times_df, pd.Series(row).to_frame().T], ignore_index=True)
+            times_df = pd.concat(
+                [times_df, pd.Series(row).to_frame().T], ignore_index=True
+            )
 
-        if i != N - 1:
             db.collections["Likes"].truncate()
             db.collections["Matches"].truncate()
 
-    # times_df = times_df.set_index(pd.Index(qty))
+    times_df = times_df.set_index(pd.Index(list(itertools.product(range(N), qty))))
     times_df.to_csv(path)

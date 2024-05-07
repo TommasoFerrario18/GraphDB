@@ -326,7 +326,4 @@ def clear_all_collections(db):
     """
     print("Clearing all collections...")
     for collection in db.collections:
-        if collection[0] == "_":
-            continue
-        print(f"Clearing collection {collection}")
         db[collection].truncate()
