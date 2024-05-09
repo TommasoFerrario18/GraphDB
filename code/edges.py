@@ -21,10 +21,6 @@ class IntColor(Edges):  # User - Color
     _fields = {}
 
 
-class Category(Edges):  # Movie - MovieCategory
-    _fields = {}
-
-
 class LivesIn(Edges):  # City - User
     _fields = {}
 
@@ -34,4 +30,7 @@ class StudiesAt(Edges):  # University - User
 
 
 class LocatedIn(Edges):  # City - Country
+    _fields = {}
+
+class CountryLocatedIn(Edges):  # Country - Continent
     _fields = {}

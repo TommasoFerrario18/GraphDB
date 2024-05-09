@@ -12,6 +12,6 @@ class SoulSyncGraph(Graph):
         EdgeDefinition("LivesIn", fromCollections=["User"], toCollections=["City"]),
         EdgeDefinition("LocatedIn", fromCollections=["City"], toCollections=["Country"]),
         EdgeDefinition("StudiesAt", fromCollections=["User"], toCollections=["University"]),
-        EdgeDefinition("Category", fromCollections=["Movie"], toCollections=["MovieCategory"])
+        EdgeDefinition("CountryLocatedIn", fromCollections=["Country"], toCollections=["Continent"])
         ]
     _orphanedCollections = []
