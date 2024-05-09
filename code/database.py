@@ -15,9 +15,10 @@ def create_database(typeDB=0):
     elif typeDB == 1:
         arangoURL = ["http://localhost:8000", "http://localhost:8001"]
         dbName = "SoulSync"
-        numberOfShards = 3
+        numberOfShards = 4
         replicationFactor = 2
         writeConcern = 1
+
 
     conn = Connection(arangoURL=arangoURL)
 

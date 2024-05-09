@@ -15,7 +15,7 @@ def fill_database(db, nodes, edges, matches):
     load_matches_batch(matches, db)
 
 
-typeDB = 0  # 0 for centralized, 1 for distributed
+typeDB = 1  # 0 for centralized, 1 for distributed
 analysis = 0  # 0 no analysis, 1 for analysis
 
 nodes, edges, matches = read_all_csv()
