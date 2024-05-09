@@ -25,7 +25,7 @@ docker run -e ARANGO_RANDOM_ROOT_PASSWORD=1 -e ARANGO_NO_AUTH=1 -p 8529:8529 -d 
 docker compose up
 ```
 
-### Comandi python 
+### Comandi python
 
 ```bash
 ```bash
@@ -83,6 +83,13 @@ FOR u IN User FILTER u._key == "123" RETURN u
 
 ### Query usate per testare il progetto
 
+Trovare tutte le persone che hanno messo like all'utente `@user`.
+
+```AQL
+FOR v, e IN 1..1 INBOUND @user Likes
+RETURN v
+```
+
 Trovare tutti gli utenti che hanno un film preferito in comune con l'utente `@user`.
 
 ```AQL
@@ -90,16 +97,6 @@ FOR v, e IN 1..1 OUTBOUND @user IntMovieCategory
   FOR v1, e1 IN 1..1 INBOUND v IntMovieCategory
     FILTER v1 != v
 RETURN v1
-```
-
-Trovare tutti gli utenti che hanno frequentato la stessa università dell'utente
-`@user`.
-
-```AQL
-FOR v, e IN 1..1 OUTBOUND @user StudiesAt
-  FOR v1, e1 IN 1..1 INBOUND v StudiesAt
-    FILTER v1 != v
-  RETURN v1
 ```
 
 Trovare tutti gli utenti che vivono nella stessa città dell'utente `@user`.
@@ -125,16 +122,13 @@ Trovare tutti gli utenti che hanno un film preferito in comune con l'utente `@us
     RETURN v3
   ```
 
-Trovare tutte le persone che hanno messo like all'utente `@user`.
-
-```AQL
-FOR v, e IN 1..1 INBOUND @user Likes
-RETURN v
-```
-
 Trovare tutti i like degli utenti che hanno fatto match con l'utente `@user`.
 
-Trovare tutti gli utenti che hanno messo like all'utente `@user` e che hanno fatto match.
+```AQL
+FOR v, e IN 1..1 ANY @user Matches
+  FOR v1, e1 IN 1..1 OUTBOUND v Likes
+RETURN v1
+```
 
 Trovare tutti gli utenti che vivono nella stessa nazione.
 
