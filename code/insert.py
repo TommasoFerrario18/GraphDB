@@ -337,22 +337,24 @@ def load_nodes_batch(nodes: pd.DataFrame, db):
     )
     dict_results["user"] = load_users_batch(nodes, db, movie, uni, cities)
 
+    df = nodes[["country_code", "city"]].drop_duplicates()
+    df = df.replace({"city": cities})
+    dict_results["country_city"] = load_country_city_edges_batches(db, df)
+
     return dict_results
 
 
 def load_country_city_edges_batches(db, cc_df):
-    countries_query = "FOR country IN Country RETURN country"
-    cities_query = "FOR city IN City RETURN city"
-
-    countries = db.AQLQuery(countries_query, rawResults=True)
-    cities = db.AQLQuery(cities_query, rawResults=True)
     docs = []
 
-    for country in countries:
-        list_of_cities = cc_df[cc_df["country"] == country["name"]]["city"].tolist()
-        for city in cities:
-            if city["name"] in list_of_cities:
-                docs.append({"_from": country["_id"], "_to": city["_id"]})
+    for row in cc_df.iterrows():
+        row = row[1]
+        docs.append(
+            {
+                "_from": "Country/" + row["country_code"],
+                "_to": "City/" + str(row["city"]),
+            }
+        )
 
     batches = [docs[i : i + batch_size] for i in range(0, len(docs), batch_size)]
 
