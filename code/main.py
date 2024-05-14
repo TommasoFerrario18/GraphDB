@@ -45,5 +45,10 @@ elif analysis == 0:
     # fill_database(db, nodes, edges, matches)
 
 
-df = execute_all_queries("User/1", "US", db)
-print(df)
+# df = execute_all_queries("User/1", "US", db)
+# print(df)
+
+delete_user_py("User/1", db, graph)
+delete_user_AQL("User/2", db)
+
+update_city("100", -22.455980, -47.532410, db)

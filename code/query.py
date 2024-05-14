@@ -1,5 +1,6 @@
 from pyArango.connection import *
 
+
 def get_user_data(user_id: str, db):
     query = "WITH User FOR u IN User FILTER u._id == @user RETURN u"
     return db.AQLQuery(query, bindVars={"user": "User/" + user_id})
@@ -78,3 +79,25 @@ def get_number_of_users_in_city(db):
         RETURN { city: city.name, numberOfUsers: usersCount }
     """
     return db.AQLQuery(query)
+
+
+def delete_user_py(user_id: str, db, graph):
+    """Delete a user from the database using python code. This function deletes
+    also the edges related to the user."""
+    query = "WITH User FOR u IN User FILTER u._id == @user RETURN u"
+    user = db.AQLQuery(query, bindVars={"user": user_id})
+    if not user:
+        print("User not found")
+        return False
+    print(user)
+    return graph.deleteVertex(user[0])
+
+
+def delete_user_AQL(user_id: str, db):
+    """Delete a user from the database using AQL query."""
+    query = "WITH User FOR u IN User FILTER u._id == @user REMOVE u IN User"
+    return db.AQLQuery(query, bindVars={"user": user_id})
+
+def update_city(city_key: str, lat: float, lon: float, db):
+    query = 'UPDATE {_key: @city } WITH { lat:@lat, long: @long} IN City'
+    return db.AQLQuery(query, bindVars={"city": city_key, "lat": lat, "long": lon})
