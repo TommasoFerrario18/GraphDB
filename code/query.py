@@ -1,6 +1,7 @@
 from pyArango.connection import *
 
 
+## Letture
 def get_user_data(user_id: str, db):
     query = "WITH User FOR u IN User FILTER u._id == @user RETURN u"
     return db.AQLQuery(query, bindVars={"user": "User/" + user_id})
@@ -81,6 +82,7 @@ def get_number_of_users_in_city(db):
     return db.AQLQuery(query)
 
 
+## Cancellazione
 def delete_user_py(user_id: str, db, graph):
     """Delete a user from the database using python code. This function deletes
     also the edges related to the user."""
@@ -98,6 +100,35 @@ def delete_user_AQL(user_id: str, db):
     query = "WITH User FOR u IN User FILTER u._id == @user REMOVE u IN User"
     return db.AQLQuery(query, bindVars={"user": user_id})
 
+
+def delete_user_color_edge(user_id: str, db):
+    query = """
+        WITH IntColor
+        FOR edge IN IntColor
+            FILTER edge._from == @user
+            REMOVE {_key: edge._key} IN IntColor
+    """
+    return db.AQLQuery(query, bindVars={"user": user_id})
+
+
+## Modifica
 def update_city(city_key: str, lat: float, lon: float, db):
-    query = 'UPDATE {_key: @city } WITH { lat:@lat, long: @long} IN City'
+    query = "UPDATE {_key: @city } WITH { lat:@lat, long: @long} IN City"
     return db.AQLQuery(query, bindVars={"city": city_key, "lat": lat, "long": lon})
+
+
+def update_user_city_edge(user_key: str, city_key: str, db):
+    query = """
+        WITH LivesIn
+        FOR edge in LivesIn 
+            FILTER edge._from == @user 
+            UPDATE {_key: edge._key} WITH {_to: @city} IN LivesIn
+            """
+    return db.AQLQuery(query, bindVars={"user": user_key, "city": city_key})
+
+def replace_all_user_field(user_key: str, new_user: dict, db):
+    query = """
+        WITH User
+        REPLACE {_key: @user} WITH @doc IN User
+    """
+    return db.AQLQuery(query, bindVars={"user": user_key, "doc": new_user})

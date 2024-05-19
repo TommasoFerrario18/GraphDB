@@ -57,9 +57,10 @@ def load_analysis_nodes(nodes: pd.DataFrame, db, path="./results/loading_nodes.c
             )
 
             row["user"] = load_users_batch(partial_nodes, db, movies, uni, cities)
-            row["located_in"] = load_country_city_edges_batches(
-                db, partial_nodes[["city", "country"]].drop_duplicates()
-            )
+
+            df = partial_nodes[["country_code", "city"]].drop_duplicates()
+            df = df.replace({"city": cities})
+            row["located_in"] = load_country_city_edges_batches(db, df)
 
             times_df = pd.concat(
                 [times_df, pd.Series(row).to_frame().T], ignore_index=True

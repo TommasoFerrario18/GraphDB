@@ -17,7 +17,7 @@ def fill_database(db, nodes, edges, matches):
 
 
 typeDB = 0  # 0 for centralized, 1 for distributed
-analysis = 0  # 0 no analysis, 1 for analysis
+analysis = 1  # 0 no analysis, 1 for analysis
 
 nodes, edges, matches = read_all_csv()
 
@@ -44,11 +44,26 @@ elif analysis == 0:
     print("Database created successfully")
     # fill_database(db, nodes, edges, matches)
 
+input("Press Enter to continue...")
 
-# df = execute_all_queries("User/1", "US", db)
+df = execute_all_queries("User/1", "US", db)
 # print(df)
 
-delete_user_py("User/1", db, graph)
-delete_user_AQL("User/2", db)
+# delete_user_py("User/1", db, graph)
+# delete_user_AQL("User/2", db)
 
-update_city("100", -22.455980, -47.532410, db)
+# update_city("100", -22.455980, -47.532410, db)
+
+# replace_all_user_field(
+#     "0",
+#     {
+#         "first_name": "Cristiano",
+#         "last_name": "Ronaldo",
+#         "email": "cr7@arstechnica.com",
+#         "phone": "165-321-0452",
+#         "birth_date": "11/10/1985",
+#         "gender": "Male",
+#         "latitude": -7.1927733,
+#         "longitude": -48.204827,
+#     }, db
+# )
