@@ -17,7 +17,7 @@ def create_database(typeDB=0):
         dbName = "SoulSync"
         numberOfShards = 4
         replicationFactor = 2
-        writeConcern = 1
+        writeConcern = 2
 
 
     conn = Connection(arangoURL=arangoURL)

@@ -16,8 +16,8 @@ def fill_database(db, nodes, edges, matches):
     load_matches_batch(matches, db)
 
 
-typeDB = 0  # 0 for centralized, 1 for distributed
-analysis = 1  # 0 no analysis, 1 for analysis
+typeDB = 1  # 0 for centralized, 1 for distributed
+analysis = 0  # 0 no analysis, 1 for analysis
 
 nodes, edges, matches = read_all_csv()
 
@@ -42,7 +42,7 @@ if analysis == 1:
     print("Edge Analysis loaded successfully")
 elif analysis == 0:
     print("Database created successfully")
-    # fill_database(db, nodes, edges, matches)
+    fill_database(db, nodes, edges, matches)
 
 input("Press Enter to continue...")
 
