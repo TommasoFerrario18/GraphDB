@@ -125,19 +125,38 @@ def create_collections(graph):
     )
 
 
-client = ArangoClient(hosts="http://localhost:8529")
+typeDB = "distributed"  # centralized or distributed
+
+if typeDB == "centralized":
+    client = ArangoClient(hosts="http://localhost:8529")
+elif typeDB == "distributed":
+    client = ArangoClient(hosts=["http://localhost:8000", "http://localhost:8001"])
 
 sys_db = client.db("_system", username="", password="")
 
 if not sys_db.has_database("SoulSync"):
-    sys_db.create_database("SoulSync")
+    if typeDB == "centralized":
+        sys_db.create_database("SoulSync")
+    elif typeDB == "distributed":
+        sys_db.create_database(
+            "SoulSync", replicationFactor=2, writeConcern=2, numberOfShards=4
+        )
 
 db = client.db("SoulSync", username="", password="")
 
 if db.has_graph("SoulSyncGraph"):
     graph = db.graph("SoulSyncGraph")
 else:
-    graph = db.create_graph("SoulSyncGraph")
+    if typeDB == "centralized":
+        graph = db.create_graph("SoulSyncGraph")
+    elif typeDB == "distributed":
+        graph = db.create_graph(
+            "SoulSyncGraph",
+            smart=True,
+            numberOfShards=4,
+            replicationFactor=2,
+            writeConcern=2,
+        )
 
     create_collections(graph)
 
@@ -146,11 +165,11 @@ print(graph.vertex_collections())
 
 nodes, edges, matches = read_all_csv()
 
-# print("Ready to load nodes.")
+print("Ready to load nodes.")
 # load_nodes_batch(nodes, graph)
 # load_user_edges_batch(edges, graph)
 # load_matches_batch(matches, graph)
-# print("All data loaded.")
+print("All data loaded.")
 
 input("Press Enter to continue...")
 print("Executing queries...")
