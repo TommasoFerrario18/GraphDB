@@ -1,14 +1,32 @@
 import time
 import pandas as pd
-from utils import *
-from pyArango.connection import *
+from arango import ArangoClient
 from concurrent.futures import ThreadPoolExecutor
+
+
+def parse_movie_generes(nodes: pd.DataFrame) -> list:
+    """
+    Parses the movie genres from the given DataFrame of nodes.
+
+    Args:
+        nodes (pd.DataFrame): DataFrame containing the nodes.
+
+    Returns:
+        list: List of unique movie genres.
+    """
+    rows = nodes["movie_genres"].apply(lambda x: x.split(","))
+    rows = rows.apply(
+        lambda x: [i.replace("[", "").replace("]", "").replace(" ", "") for i in x]
+    )
+    flat_list = [x for xs in rows.to_list() for x in xs]
+    return pd.Series(flat_list).unique().tolist()
+
 
 batch_size = 100
 
 
 def insert_batch(batch, collection):
-    collection.bulkSave(batch)
+    collection.insert_many(batch)
 
 
 def load_movies_batch(movies: list, db):
@@ -25,7 +43,8 @@ def load_movies_batch(movies: list, db):
     start = time.time()
     with ThreadPoolExecutor(max_workers=5) as executor:
         features = [
-            executor.submit(insert_batch, batch, db["Movie"]) for batch in batches
+            executor.submit(insert_batch, batch, db.vertex_collection("Movie"))
+            for batch in batches
         ]
         for f in features:
             f.result()
@@ -45,7 +64,7 @@ def load_movie_genres_batch(movie_genres: list, db):
         docs.append({"_key": genre, "name": genre})
 
     start = time.time()
-    insert_batch(docs, db["MovieCategory"])
+    insert_batch(docs, db.vertex_collection("MovieCategory"))
     end = time.time()
     print("Movie genres loaded in ", end - start, " seconds\n")
     return end - start
@@ -58,7 +77,7 @@ def load_colors_batch(colors: list, db):
         docs.append({"_key": color, "name": color})
 
     start = time.time()
-    insert_batch(docs, db["Color"])
+    insert_batch(docs, db.vertex_collection("Color"))
     end = time.time()
     print("Colors loaded in ", end - start, " seconds\n")
     return end - start
@@ -77,7 +96,8 @@ def load_universities_batch(universities: list, db):
     start = time.time()
     with ThreadPoolExecutor(max_workers=5) as executor:
         features = [
-            executor.submit(insert_batch, batch, db["University"]) for batch in batches
+            executor.submit(insert_batch, batch, db.vertex_collection("University"))
+            for batch in batches
         ]
         for f in features:
             f.result()
@@ -93,7 +113,7 @@ def load_continent_batch(continent, db):
         docs.append({"_key": cont, "name": cont})
 
     start = time.time()
-    insert_batch(docs, db["Continent"])
+    insert_batch(docs, db.vertex_collection("Continent"))
     end = time.time()
     print("Continent loaded in ", end - start, " seconds\n")
     return end - start
@@ -114,7 +134,8 @@ def load_cities_batch(cities, db):
     start = time.time()
     with ThreadPoolExecutor(max_workers=5) as executor:
         features = [
-            executor.submit(insert_batch, batch, db["City"]) for batch in batches
+            executor.submit(insert_batch, batch, db.vertex_collection("City"))
+            for batch in batches
         ]
         for f in features:
             f.result()
@@ -155,13 +176,14 @@ def load_countries_batch(countries: pd.DataFrame, db):
     start = time.time()
     with ThreadPoolExecutor(max_workers=5) as executor:
         features = [
-            executor.submit(insert_batch, batch, db["Country"]) for batch in batches
+            executor.submit(insert_batch, batch, db.vertex_collection("Country"))
+            for batch in batches
         ]
         for f in features:
             f.result()
     end = time.time()
 
-    insert_batch(continent_docs, db["CountryLocatedIn"])
+    insert_batch(continent_docs, db.vertex_collection("CountryLocatedIn"))
     print("Countries loaded in ", end - start, " seconds\n")
 
     return end - start
@@ -258,14 +280,15 @@ def load_users_batch(
     start = time.time()
     with ThreadPoolExecutor(max_workers=5) as executor:
         features = [
-            executor.submit(insert_batch, batch, db["User"]) for batch in batches
+            executor.submit(insert_batch, batch, db.vertex_collection("User"))
+            for batch in batches
         ]
         for f in features:
             f.result()
 
     with ThreadPoolExecutor(max_workers=5) as executor:
         features = [
-            executor.submit(insert_batch, batch, db["IntMovieCategory"])
+            executor.submit(insert_batch, batch, db.edge_collection("IntMovieCategory"))
             for batch in movie_genres_batches
         ]
         for f in features:
@@ -273,7 +296,7 @@ def load_users_batch(
 
     with ThreadPoolExecutor(max_workers=5) as executor:
         features = [
-            executor.submit(insert_batch, batch, db["IntMovie"])
+            executor.submit(insert_batch, batch, db.edge_collection("IntMovie"))
             for batch in movies_batches
         ]
         for f in features:
@@ -281,7 +304,7 @@ def load_users_batch(
 
     with ThreadPoolExecutor(max_workers=5) as executor:
         features = [
-            executor.submit(insert_batch, batch, db["IntColor"])
+            executor.submit(insert_batch, batch, db.edge_collection("IntColor"))
             for batch in colors_batches
         ]
         for f in features:
@@ -289,7 +312,7 @@ def load_users_batch(
 
     with ThreadPoolExecutor(max_workers=5) as executor:
         features = [
-            executor.submit(insert_batch, batch, db["StudiesAt"])
+            executor.submit(insert_batch, batch, db.edge_collection("StudiesAt"))
             for batch in universities_batches
         ]
         for f in features:
@@ -297,7 +320,7 @@ def load_users_batch(
 
     with ThreadPoolExecutor(max_workers=5) as executor:
         features = [
-            executor.submit(insert_batch, batch, db["LivesIn"])
+            executor.submit(insert_batch, batch, db.edge_collection("LivesIn"))
             for batch in cities_batches
         ]
         for f in features:
@@ -362,7 +385,8 @@ def load_country_city_edges_batches(db, cc_df):
     start = time.time()
     with ThreadPoolExecutor(max_workers=5) as executor:
         features = [
-            executor.submit(insert_batch, batch, db["LocatedIn"]) for batch in batches
+            executor.submit(insert_batch, batch, db.edge_collection("LocatedIn"))
+            for batch in batches
         ]
         for f in features:
             f.result()
@@ -385,7 +409,8 @@ def load_user_edges_batch(edges: pd.DataFrame, db):
     start = time.time()
     with ThreadPoolExecutor(max_workers=5) as executor:
         features = [
-            executor.submit(insert_batch, batch, db["Likes"]) for batch in batches
+            executor.submit(insert_batch, batch, db.edge_collection("Likes"))
+            for batch in batches
         ]
         for f in features:
             f.result()
@@ -408,7 +433,8 @@ def load_matches_batch(matches: pd.DataFrame, db):
     start = time.time()
     with ThreadPoolExecutor(max_workers=5) as executor:
         features = [
-            executor.submit(insert_batch, batch, db["Matches"]) for batch in batches
+            executor.submit(insert_batch, batch, db.edge_collection("Matches"))
+            for batch in batches
         ]
         for f in features:
             f.result()
