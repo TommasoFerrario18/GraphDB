@@ -7,7 +7,9 @@ from query import *
 import itertools
 
 
-def load_analysis_nodes(nodes: pd.DataFrame, db, path="./results/loading_nodes.csv"):
+def load_analysis_nodes(
+    nodes: pd.DataFrame, db, graph, path="./results/loading_nodes.csv"
+):
     times_df = pd.DataFrame(
         columns=[
             "city",
@@ -66,7 +68,7 @@ def load_analysis_nodes(nodes: pd.DataFrame, db, path="./results/loading_nodes.c
                 [times_df, pd.Series(row).to_frame().T], ignore_index=True
             )
             if i < N - 1 or j < len(qty) - 1:
-                clear_all_collections(db)
+                clear_all_collections(graph, db)
 
     times_df = times_df.set_index(pd.Index(list(itertools.product(range(N), qty))))
     times_df.to_csv(path)
@@ -98,8 +100,8 @@ def load_analysis_edges(
                 [times_df, pd.Series(row).to_frame().T], ignore_index=True
             )
             if i < N - 1 or j < len(qty) - 1:
-                db.collections["Likes"].truncate()
-                db.collections["Matches"].truncate()
+                db.collection("Likes").truncate()
+                db.collection("Matches").truncate()
 
     times_df = times_df.set_index(pd.Index(list(itertools.product(range(N), qty))))
     times_df.to_csv(path)

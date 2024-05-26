@@ -106,6 +106,7 @@ def create_database(typeDB):
         create_collections(graph)
 
     print("Database setup completed.")
+    return db, graph
 
 
 def fill_database(graph, nodes, edges, matches):
