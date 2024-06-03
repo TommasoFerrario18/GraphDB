@@ -81,6 +81,7 @@ def get_number_of_users_in_city(db):
     """
     return db.aql.execute(query)
 
+
 def get_city(city: str, db):
     query = "WITH City FOR city IN City FILTER city._key == @city RETURN city"
     return db.aql.execute(query, bind_vars={"city": city})
@@ -140,7 +141,9 @@ def replace_all_user_field(user_key: str, new_user: dict, db):
     return db.aql.execute(query, bind_vars={"user": user_key, "doc": new_user})
 
 
-def simulating_node_failure(graph, db, user_id: str, country_code: str, city_key: str, lat: float, lon: float):
+def simulating_node_failure(
+    graph, db, user_id: str, country_code: str, city_key: str, lat: float, lon: float
+):
     print("Simulating node failure")
     print("Reading data")
     cursor = get_all_user_of_a_country(country_code=country_code, db=db)
@@ -151,17 +154,28 @@ def simulating_node_failure(graph, db, user_id: str, country_code: str, city_key
     print("User read", list_user)
     delete_user_py(user_id, db, graph)
     delete_vertex = [doc for doc in get_user_data(user_id, db)]
-    print("User deleted", len(delete_vertex))    
+    print("User deleted", len(delete_vertex))
     print("Inserting user")
-    
+
     user_node = list_user[0]
     del user_node["_id"]
     del user_node["_rev"]
     del user_node["_key"]
-    
+
     graph.insert_vertex("User", list_user[0])
     print("User inserted")
     print("Updating user")
     update_city(city_key, lat, lon, db)
     l = [doc for doc in get_city(city_key, db)]
     print("City updated", l)
+
+
+def update_all_city(db):
+    query = """FOR city IN City 
+    UPDATE {_key: city._key} WITH { lat:@lat, long: @long} IN City"""
+    return db.aql.execute(query, bind_vars={"lat": 0, "long": 0})
+
+def update_all_like(db):
+    query = """FOR like IN Likes 
+    UPDATE {_key: like._key} WITH {vote:@vote} IN City"""
+    return db.aql.execute(query, bind_vars={"vote": 9})
