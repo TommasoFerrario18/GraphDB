@@ -45,6 +45,6 @@ df = execute_all_queries("User/100", "US", db)
 print(df.mean())
 print(df.std())
 
-df.to_csv("./results/query_results_1_nodes.csv")
+df.to_csv("./results/query_results_2_nodes.csv")
 
 # simulating_node_failure(graph, db, "1", "US", "1", 0.0, 0.0)
