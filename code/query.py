@@ -1,6 +1,5 @@
 from arango import ArangoClient
 
-
 ## Letture
 def get_user_data(user_id: str, db):
     query = "WITH User FOR u IN User FILTER u._id == @user RETURN u"
@@ -176,6 +175,6 @@ def update_all_city(db):
     return db.aql.execute(query, bind_vars={"lat": 0, "long": 0})
 
 def update_all_like(db):
-    query = """FOR like IN Likes 
-    UPDATE {_key: like._key} WITH {vote:@vote} IN City"""
+    query = """FOR edge IN Likes 
+    UPDATE {_key: edge._key} WITH {vote:@vote} IN Likes"""
     return db.aql.execute(query, bind_vars={"vote": 9})
