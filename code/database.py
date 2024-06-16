@@ -92,9 +92,10 @@ def create_database(typeDB):
     if db.has_graph("SoulSyncGraph"):
         graph = db.graph("SoulSyncGraph")
     else:
-        if typeDB == "centralized":
+        if typeDB == 0:
+            print("Creating centralized graph")
             graph = db.create_graph("SoulSyncGraph")
-        elif typeDB == "distributed":
+        elif typeDB == 1:
             graph = db.create_graph(
                 "SoulSyncGraph",
                 smart=True,
@@ -102,7 +103,7 @@ def create_database(typeDB):
                 replication_factor=2,
                 write_concern=2,
             )
-
+        print("Graph created")
         create_collections(graph)
 
     print("Database setup completed.")

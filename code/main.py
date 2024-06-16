@@ -16,13 +16,15 @@ if typeDB == 0:
 elif typeDB == 1:
     path_edges = "./results/loading_edges_dist.csv"
     path_nodes = "./results/loading_nodes_dist.csv"
+
 start = time.time()
 db, graph = create_database(typeDB)
 print("Time to create database: ", time.time() - start)
 
-# clear_all_collections(graph, db)
+clear_all_collections(graph, db)
 
-input("Press Enter to continue...")
+
+input("Press Enter to continue with insertion...")
 
 if analysis == 1:
     print("Database created successfully")
@@ -36,15 +38,25 @@ if analysis == 1:
     print("Edge Analysis loaded successfully")
 elif analysis == 0:
     print("Database created successfully")
-    # fill_database(db, nodes, edges, matches)
+    fill_database(db, nodes, edges, matches)
 
-input("Press Enter to continue...")
+input("Press Enter to continue with queries...")
 
 print("Executing queries...")
 df = execute_all_queries("User/100", "US", db)
-print(df.mean())
-print(df.std())
+print(df.mean().T)
+print(df.std().T)
 
-df.to_csv("./results/query_results_1_nodes.csv")
+input("Press Enter to continue with updates...")
+update_all_city(db)
+update_all_like(db)
+update_user_city_edge("User/0", "City/100", db)
+replace_all_user_field("100", {"name": "John Doe", "age": 30}, db)
 
-# simulating_node_failure(graph, db, "1", "US", "1", 0.0, 0.0)
+input("Press Enter to continue with removals...")
+
+delete_user_py("User/100", db, graph)
+delete_user_AQL("User/101", db)
+delete_user_color_edge("User/102", db)
+
+print("Users deleted successfully")

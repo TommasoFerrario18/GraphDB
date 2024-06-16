@@ -22,15 +22,16 @@ docker run -e ARANGO_RANDOM_ROOT_PASSWORD=1 -e ARANGO_NO_AUTH=1 -p 8529:8529 -d 
 ### Versione distribuita
 
 ```bash
-docker compose up
+docker compose up -d
 ```
 
 ### Comandi python
 
 ```bash
 ```bash
-pip install pyarango
+pip install python-arango
 ```
+
 
 ## Struttura del database
 
