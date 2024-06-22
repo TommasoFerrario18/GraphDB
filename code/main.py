@@ -5,7 +5,7 @@ from query import *
 from database import *
 import time
 
-typeDB = 1  # 0 for centralized, 1 for distributed
+typeDB = 0  # 0 for centralized, 1 for distributed
 analysis = 0  # 0 no analysis, 1 for analysis
 
 nodes, edges, matches = read_all_csv()
@@ -55,8 +55,8 @@ replace_all_user_field("100", {"name": "John Doe", "age": 30}, db)
 
 input("Press Enter to continue with removals...")
 
-delete_user_py("User/100", db, graph)
-delete_user_AQL("User/101", db)
-delete_user_color_edge("User/102", db)
+# delete_user_py("User/100", db, graph)
+# delete_user_AQL("User/101", db)
+# delete_user_color_edge("User/102", db)
 
 print("Users deleted successfully")

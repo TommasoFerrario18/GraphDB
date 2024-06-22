@@ -15,23 +15,70 @@ sito [Mockaroo](https://www.mockaroo.com/).
 
 ### Versione centralizzata
 
+Per la versione centralizzata è possibile utilizzare il seguente comando per
+avviare il container di ArangoDB. Una volota avviato il container sarà possibile
+accedere alla web interface di ArangoDB all'indirizzo `http://localhost:8529/`.
+
 ```bash
 docker run -e ARANGO_RANDOM_ROOT_PASSWORD=1 -e ARANGO_NO_AUTH=1 -p 8529:8529 -d arangodb
 ```
 
 ### Versione distribuita
 
+Per la versione distribuita abbiamo deciso di utilizzare docker compose per
+semplificare il processo di creazione e gestione del cluster. Una volta avviato
+il cluster sarà possibile accedere alla web interface di ArangoDB all'indirizzo
+`http://localhost:8000/` e `http://localhost:8001/`.
+
 ```bash
 docker compose up -d
 ```
 
+**N.B.** Nella user interface di ArangoDB è necessario selezionare attraverso il menù
+a tendina posizionato nell'angolo in alto a destra il database che si vuole
+visualizzare.
+
 ### Comandi python
 
+Per eseguire il codice python è necessario installare la libreria `python-arango`.
+
 ```bash
-```bash
-pip install python-arango
+pip install requirements.txt
 ```
 
+Mentre per ripetere gli esperimenti realizzati con ArangoDB è necessario eseguire
+il codice python contenuto nella cartella `code`. In particolare, nel file `main.py`
+è presente tutta la pipeline necessaria per la creazione del database, l'inserimento
+dei dati e l'esecuzione delle query. In base alla versione del database che si vuole
+utilizzare (centralizzata o distribuita) è necessario modificare il valore della
+variabile `typeDB` presente nel file `main.py`.
+
+- `typeDB` = 0: versione centralizzata
+- `typeDB` = 1: versione distribuita
+
+```bash
+python ./code/main.py
+```
+
+### Partizionamento della rete
+
+Per il partizionamento della rete si è scelto di utilizzare spostare in un'altra
+rete docker alcuni nodi del cluster. Questo è stato realizzato utilizzando il
+comando `docker network connect` e `docker network disconnect`.
+
+Per prima cosa si è creata una nuova rete docker con il comando:
+
+```bash
+docker network isolated_network
+```
+
+Una volta fatto ciò si è proceduto alla simulazione di un partizionamento della
+rete sfruttando i seguenti comandi:
+
+```bash
+docker network disconnect progettographdb_default progettographdb-db1-1
+docker network connect isolated_network progettographdb-db1-1
+```
 
 ## Struttura del database
 
@@ -67,21 +114,6 @@ pip install python-arango
 - Utente-Università: l'università che frequenta o ha frequentato
 - Utente-Città: la città in cui vive l'utente
 
-## Esempio di query
-
-Vogliamo ottenere tutte le città che si trovano in Australia.
-
-```AQL
-FOR city IN 1..1 OUTBOUND "Country/AU" LocatedIn RETURN city
-```
-
-```AQL
-FOR v, e, p IN 1..1 OUTBOUND "User/123" GRAPH SoulSyncGraph RETURN { "edge": e, "destination": v }
-FOR user IN 1..1 ANY "User/123" Matches RETURN user
-FOR user IN Matches FILTER  user._from == "User/123" OR user._to == "User/123" RETURN user
-FOR u IN User FILTER u._key == "123" RETURN u
-```
-
 ### Query usate per testare il progetto
 
 Ottenere tutte le informazioni sull'utente `@user`.
@@ -102,7 +134,7 @@ Trovare tutti gli utenti che hanno un film preferito in comune con l'utente `@us
 ```AQL
 FOR v, e IN 1..1 OUTBOUND @user IntMovieCategory
   FOR v1, e1 IN 1..1 INBOUND v IntMovieCategory
-    FILTER v1 != v
+    FILTER v1 != @user
 RETURN v1
 ```
 
@@ -111,7 +143,7 @@ Trovare tutti gli utenti che vivono nella stessa città dell'utente `@user`.
 ```AQL
 FOR v, e IN 1..1 OUTBOUND @user LivesIn 
   FOR v1, e1 IN 1..1 INBOUND v LivesIn
-    FILTER v1 != v
+    FILTER v1 != @user
   RETURN v1
 ```
 
@@ -121,10 +153,10 @@ Trovare tutti gli utenti che hanno un film preferito in comune con l'utente `@us
   ```AQL
   FOR v, e IN 1..1 OUTBOUND @user IntMovieCategory
     FOR v1, e1 IN 1..1 INBOUND v IntMovieCategory
-      FILTER v1 != v
+      FILTER v1 != @user
     FOR v2, e2 IN 1..1 OUTBOUND @user StudiesAt
       FOR v3, e3 IN 1..1 INBOUND v2 StudiesAt
-        FILTER v3 != v2
+        FILTER v3 != @user
       FILTER v3 == v1
     RETURN v3
   ```
