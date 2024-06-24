@@ -100,7 +100,7 @@ def create_database(typeDB):
                 "SoulSyncGraph",
                 smart=True,
                 shard_count=4,
-                replication_factor=2,
+                replication_factor=3,
                 write_concern=2,
             )
         print("Graph created")

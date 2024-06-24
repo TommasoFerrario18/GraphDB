@@ -5,7 +5,7 @@ from query import *
 from database import *
 import time
 
-typeDB = 0  # 0 for centralized, 1 for distributed
+typeDB = 1  # 0 for centralized, 1 for distributed
 analysis = 0  # 0 no analysis, 1 for analysis
 
 nodes, edges, matches = read_all_csv()
@@ -21,7 +21,7 @@ start = time.time()
 db, graph = create_database(typeDB)
 print("Time to create database: ", time.time() - start)
 
-clear_all_collections(graph, db)
+# clear_all_collections(graph, db)
 
 
 input("Press Enter to continue with insertion...")
@@ -38,7 +38,7 @@ if analysis == 1:
     print("Edge Analysis loaded successfully")
 elif analysis == 0:
     print("Database created successfully")
-    fill_database(db, nodes, edges, matches)
+    # fill_database(db, nodes, edges, matches)
 
 input("Press Enter to continue with queries...")
 
