@@ -16,7 +16,7 @@ def find_user_which_like_same_movie_category(user_id: str, db):
     WITH User, MovieCategory
     FOR v, e IN 1..1 OUTBOUND @user IntMovieCategory 
         FOR v1, e1 IN 1..1 INBOUND v IntMovieCategory
-            FILTER v1 != v
+            FILTER v1 != @user
         RETURN v1
     """
     return db.aql.execute(query, bind_vars={"user": "User/" + user_id})
@@ -27,7 +27,7 @@ def get_all_users_which_live_in_same_city(user_id: str, db):
     WITH User, City
     FOR v, e IN 1..1 OUTBOUND @user LivesIn 
         FOR v1, e1 IN 1..1 INBOUND v LivesIn
-            FILTER v1 != v
+            FILTER v1 != @user
         RETURN v1
     """
     return db.aql.execute(query, bind_vars={"user": "User/" + user_id})
@@ -38,10 +38,10 @@ def get_users_which_have_same_movie_and_studied_same_university(user_id: str, db
         WITH User, MovieCategory, University
         FOR v, e IN 1..1 OUTBOUND @user IntMovieCategory
             FOR v1, e1 IN 1..1 INBOUND v IntMovieCategory
-                FILTER v1 != v
+                FILTER v1 != @user
                 FOR v2, e2 IN 1..1 OUTBOUND @user StudiesAt
                     FOR v3, e3 IN 1..1 INBOUND v2 StudiesAt
-                        FILTER v3 != v2
+                        FILTER v3 != @user
                 FILTER v3 == v1
         RETURN v3
     """
