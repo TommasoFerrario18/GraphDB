@@ -1,5 +1,6 @@
 from arango import ArangoClient
 
+
 ## Letture
 def get_user_data(user_id: str, db):
     query = "WITH User FOR u IN User FILTER u._id == @user RETURN u"
@@ -7,17 +8,17 @@ def get_user_data(user_id: str, db):
 
 
 def get_users_which_like_user(user_id: str, db):
-    query = "WITH User FOR node, edge IN 1..1 INBOUND @user Likes RETURN node"
+    query = "WITH User FOR user, edge IN 1..1 INBOUND @user Likes RETURN user"
     return db.aql.execute(query, bind_vars={"user": "User/" + user_id})
 
 
 def find_user_which_like_same_movie_category(user_id: str, db):
     query = """
     WITH User, MovieCategory
-    FOR v, e IN 1..1 OUTBOUND @user IntMovieCategory 
-        FOR v1, e1 IN 1..1 INBOUND v IntMovieCategory
-            FILTER v1 != @user
-        RETURN v1
+    FOR category, e IN 1..1 OUTBOUND @user IntMovieCategory
+        FOR user, edge IN 1..1 INBOUND category IntMovieCategory
+            FILTER user != @user
+    RETURN category
     """
     return db.aql.execute(query, bind_vars={"user": "User/" + user_id})
 
@@ -25,25 +26,25 @@ def find_user_which_like_same_movie_category(user_id: str, db):
 def get_all_users_which_live_in_same_city(user_id: str, db):
     query = """
     WITH User, City
-    FOR v, e IN 1..1 OUTBOUND @user LivesIn 
-        FOR v1, e1 IN 1..1 INBOUND v LivesIn
-            FILTER v1 != @user
-        RETURN v1
+    FOR city, e IN 1..1 OUTBOUND @user LivesIn 
+        FOR user, edge IN 1..1 INBOUND city LivesIn
+            FILTER user != @user
+    RETURN user
     """
     return db.aql.execute(query, bind_vars={"user": "User/" + user_id})
 
 
 def get_users_which_have_same_movie_and_studied_same_university(user_id: str, db):
     query = """
-        WITH User, MovieCategory, University
-        FOR v, e IN 1..1 OUTBOUND @user IntMovieCategory
-            FOR v1, e1 IN 1..1 INBOUND v IntMovieCategory
-                FILTER v1 != @user
-                FOR v2, e2 IN 1..1 OUTBOUND @user StudiesAt
-                    FOR v3, e3 IN 1..1 INBOUND v2 StudiesAt
-                        FILTER v3 != @user
-                FILTER v3 == v1
-        RETURN v3
+    WITH User, MovieCategory, University
+    FOR category, e IN 1..1 OUTBOUND @user IntMovieCategory
+        FOR user1, e1 IN 1..1 INBOUND category IntMovieCategory
+                FILTER user1 != @user
+        FOR colleague, e2 IN 1..1 OUTBOUND @user StudiesAt
+            FOR user2, e3 IN 1..1 INBOUND colleague StudiesAt
+                FILTER user2 != @user
+            FILTER user1 == user2
+    RETURN user1
     """
     return db.aql.execute(query, bind_vars={"user": "User/" + user_id})
 
@@ -173,6 +174,7 @@ def update_all_city(db):
     query = """FOR city IN City 
     UPDATE {_key: city._key} WITH { lat:@lat, long: @long} IN City"""
     return db.aql.execute(query, bind_vars={"lat": 0, "long": 0})
+
 
 def update_all_like(db):
     query = """FOR edge IN Likes 
