@@ -32,7 +32,7 @@ batch_size = 100
 
 
 def insert_batch(batch, collection):
-    collection.insert_many(batch, silent=True)
+    collection.insert_many(batch, silent=False, sync=False)
 
 
 def load_movies_batch(movies: list, db):
