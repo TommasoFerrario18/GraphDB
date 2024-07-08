@@ -118,6 +118,7 @@ def execute_all_queries(user_id: str, country_code: str, db):
             "Query_6",
             "Query_7",
             "Query_8",
+            "Query_9",
         ]
     )
     N = 30
@@ -154,6 +155,10 @@ def execute_all_queries(user_id: str, country_code: str, db):
         start = time.time()
         get_number_of_users_in_city(db)
         row["Query_8"] = time.time() - start
+        
+        start = time.time()
+        get_all_user(db)
+        row["Query_9"] = time.time() - start
 
         times_df = pd.concat([times_df, pd.Series(row).to_frame().T], ignore_index=True)
 

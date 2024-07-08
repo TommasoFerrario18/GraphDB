@@ -20,14 +20,14 @@ elif typeDB == 1:
     # path_edges = "./results/loading_edges_dist_new_with_ack.csv"
     # path_nodes = "./results/loading_nodes_dist_new_with_ack.csv"
     
-    path_edges = "./results/loading_edges_dist_new_wc1.csv"
-    path_nodes = "./results/loading_nodes_dist_new_wc1.csv"
+    path_edges = "./results/loading_edges_dist_new_wc3.csv"
+    path_nodes = "./results/loading_nodes_dist_new_wc3.csv"
 
 start = time.time()
 db, graph = create_database(typeDB)
 print("Time to create database: ", time.time() - start)
 
-clear_all_collections(graph, db)
+# clear_all_collections(graph, db)
 
 input("Press Enter to continue with insertion...")
 
@@ -43,13 +43,13 @@ if analysis == 1:
     print("Edge Analysis loaded successfully")
 elif analysis == 0:
     print("Database created successfully")
-    fill_database(db, nodes, edges, matches)
+    # fill_database(db, nodes, edges, matches)
 
 input("Press Enter to continue with queries...")
 
 print("Executing queries...")
 df = execute_all_queries("User/100", "US", db)
-df.to_csv("./results/queries_results_node_3.csv", index=False)
+df.to_csv("./results/queries_results_node_2.csv", index=False)
 # print(df.mean().T)
 # print(df.std().T)
 

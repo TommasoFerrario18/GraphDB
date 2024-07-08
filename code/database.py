@@ -101,7 +101,7 @@ def create_database(typeDB):
                 smart=True,
                 shard_count=4,
                 replication_factor=3,
-                write_concern=2,
+                write_concern=3,
             )
         print("Graph created")
         create_collections(graph)

@@ -86,6 +86,9 @@ def get_city(city: str, db):
     query = "WITH City FOR city IN City FILTER city._key == @city RETURN city"
     return db.aql.execute(query, bind_vars={"city": city})
 
+def get_all_user(db):
+    query = "FOR u IN User RETURN u"
+    return db.aql.execute(query)
 
 ## Cancellazione
 def delete_user_py(user_id: str, db, graph):
