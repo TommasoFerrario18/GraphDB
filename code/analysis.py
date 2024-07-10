@@ -119,6 +119,7 @@ def execute_all_queries(user_id: str, country_code: str, db):
             "Query_7",
             "Query_8",
             "Query_9",
+            "Query_10",
         ]
     )
     N = 30
@@ -141,7 +142,7 @@ def execute_all_queries(user_id: str, country_code: str, db):
         row["Query_4"] = time.time() - start
 
         start = time.time()
-        get_users_which_have_same_movie_and_studied_same_university(user_id, db)
+        # get_users_which_have_same_movie_and_studied_same_university(user_id, db)
         row["Query_5"] = time.time() - start
 
         start = time.time()
@@ -155,10 +156,14 @@ def execute_all_queries(user_id: str, country_code: str, db):
         start = time.time()
         get_number_of_users_in_city(db)
         row["Query_8"] = time.time() - start
-        
+
         start = time.time()
         get_all_user(db)
         row["Query_9"] = time.time() - start
+
+        start = time.time()
+        get_movie_like_and_match(user_id, db)
+        row["Query_10"] = time.time() - start
 
         times_df = pd.concat([times_df, pd.Series(row).to_frame().T], ignore_index=True)
 

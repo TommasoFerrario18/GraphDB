@@ -4,12 +4,12 @@ from arango import ArangoClient
 ## Letture
 def get_user_data(user_id: str, db):
     query = "WITH User FOR u IN User FILTER u._id == @user RETURN u"
-    return db.aql.execute(query, bind_vars={"user": "User/" + user_id})
+    return db.aql.execute(query, bind_vars={"user": user_id}, cache=False)
 
 
 def get_users_which_like_user(user_id: str, db):
     query = "WITH User FOR user, edge IN 1..1 INBOUND @user Likes RETURN user"
-    return db.aql.execute(query, bind_vars={"user": "User/" + user_id})
+    return db.aql.execute(query, bind_vars={"user": user_id}, cache=False)
 
 
 def find_user_which_like_same_movie_category(user_id: str, db):
@@ -20,7 +20,7 @@ def find_user_which_like_same_movie_category(user_id: str, db):
             FILTER user != @user
     RETURN category
     """
-    return db.aql.execute(query, bind_vars={"user": "User/" + user_id})
+    return db.aql.execute(query, bind_vars={"user": user_id}, cache=False)
 
 
 def get_all_users_which_live_in_same_city(user_id: str, db):
@@ -31,7 +31,7 @@ def get_all_users_which_live_in_same_city(user_id: str, db):
             FILTER user != @user
     RETURN user
     """
-    return db.aql.execute(query, bind_vars={"user": "User/" + user_id})
+    return db.aql.execute(query, bind_vars={"user": user_id}, cache=False)
 
 
 def get_users_which_have_same_movie_and_studied_same_university(user_id: str, db):
@@ -46,7 +46,7 @@ def get_users_which_have_same_movie_and_studied_same_university(user_id: str, db
             FILTER user1 == user2
     RETURN user1
     """
-    return db.aql.execute(query, bind_vars={"user": "User/" + user_id})
+    return db.aql.execute(query, bind_vars={"user": user_id}, cache=False)
 
 
 def get_likes_of_user_match(user_id: str, db):
@@ -56,7 +56,7 @@ def get_likes_of_user_match(user_id: str, db):
         FOR v1, e1 IN 1..1 OUTBOUND v Likes
     RETURN v1
     """
-    return db.aql.execute(query, bind_vars={"user": "User/" + user_id})
+    return db.aql.execute(query, bind_vars={"user": "User/" + user_id}, cache=False)
 
 
 def get_all_user_of_a_country(country_code: str, db):
@@ -66,7 +66,9 @@ def get_all_user_of_a_country(country_code: str, db):
             FOR user, edge1 IN 1..1 ANY city LivesIn
         RETURN {"User": user._id, "City": city.name}
     """
-    return db.aql.execute(query, bind_vars={"country": "Country/" + country_code})
+    return db.aql.execute(
+        query, bind_vars={"country": "Country/" + country_code}, cache=False
+    )
 
 
 def get_number_of_users_in_city(db):
@@ -79,16 +81,29 @@ def get_number_of_users_in_city(db):
             )
         RETURN { city: city.name, numberOfUsers: usersCount }
     """
-    return db.aql.execute(query)
+    return db.aql.execute(query, cache=False)
 
 
 def get_city(city: str, db):
     query = "WITH City FOR city IN City FILTER city._key == @city RETURN city"
-    return db.aql.execute(query, bind_vars={"city": city})
+    return db.aql.execute(query, bind_vars={"city": city}, cache=False)
+
 
 def get_all_user(db):
     query = "FOR u IN User RETURN u"
-    return db.aql.execute(query)
+    return db.aql.execute(query, cache=False)
+
+
+def get_movie_like_and_match(user_id: str, db):
+    query = """
+    WITH User, Movie
+    FOR match, e IN 1..1 OUTBOUND @user Likes
+        FOR user, edge_like IN 1..1 OUTBOUND match._id Likes
+            FOR movie, edge_movie IN 1..1 ANY user._id IntMovie
+    RETURN DISTINCT movie
+    """
+    return db.aql.execute(query, bind_vars={"user": user_id}, cache=False)
+
 
 ## Cancellazione
 def delete_user_py(user_id: str, db, graph):

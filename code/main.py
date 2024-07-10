@@ -20,8 +20,8 @@ elif typeDB == 1:
     # path_edges = "./results/loading_edges_dist_new_with_ack.csv"
     # path_nodes = "./results/loading_nodes_dist_new_with_ack.csv"
     
-    path_edges = "./results/loading_edges_dist_new_wc3.csv"
-    path_nodes = "./results/loading_nodes_dist_new_wc3.csv"
+    path_edges = "./results/loading_edges_dist_new_wc1.csv"
+    path_nodes = "./results/loading_nodes_dist_new_wc1.csv"
 
 start = time.time()
 db, graph = create_database(typeDB)
@@ -49,7 +49,7 @@ input("Press Enter to continue with queries...")
 
 print("Executing queries...")
 df = execute_all_queries("User/100", "US", db)
-df.to_csv("./results/queries_results_node_2.csv", index=False)
+df.to_csv("./results/queries_results_node_1.csv", index=False)
 # print(df.mean().T)
 # print(df.std().T)
 
