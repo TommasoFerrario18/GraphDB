@@ -23,9 +23,11 @@ def read_all_csv() -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     """
     Reads all the CSV files and returns them.
     """
-    users = pd.read_csv("./data/nodes.csv").drop(["Unnamed: 0"], axis=1)
-    edges = pd.read_csv("./data/edges.csv")
-    matches = pd.read_csv("./data/matches.csv")
+    users = pd.read_csv("./data/new_nodes.csv").drop(["Unnamed: 0"], axis=1)
+    edges = pd.read_csv("./data/new_edges.csv").drop(["Unnamed: 0"], axis=1)
+    edges.columns = ["src", "dest"]
+    matches = pd.read_csv("./data/new_matches.csv").drop(["Unnamed: 0"], axis=1)
+    matches.columns = ["src", "dest"]
     return users, edges, matches
 
 def parse_cities(nodes: pd.DataFrame) -> dict[str, pd.Series]:

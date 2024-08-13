@@ -119,63 +119,73 @@ docker network connect isolated_network progettographdb-db1-1
 Ottenere tutte le informazioni sull'utente `@user`.
 
 ```AQL
-FOR u IN User FILTER u._key == @user RETURN u
+  WITH User 
+  FOR u IN User 
+    FILTER u._id == @user 
+  RETURN u
 ```
 
 Trovare tutte le persone che hanno messo like all'utente `@user`.
 
 ```AQL
-FOR v, e IN 1..1 INBOUND @user Likes
-RETURN v
+WITH User
+FOR user, edge IN 1..1 INBOUND @user Likes
+RETURN user
 ```
 
-Trovare tutti gli utenti che hanno un film preferito in comune con l'utente `@user`.
+Trovare tutti gli utenti che hanno la categoria di film preferita in comune con
+l'utente `@user`.
 
 ```AQL
-FOR v, e IN 1..1 OUTBOUND @user IntMovieCategory
-  FOR v1, e1 IN 1..1 INBOUND v IntMovieCategory
-    FILTER v1 != @user
-RETURN v1
+  WITH User, MovieCategory
+  FOR category, e IN 1..1 OUTBOUND @user IntMovieCategory
+    FOR user, edge IN 1..1 INBOUND category IntMovieCategory
+      FILTER user != @user
+  RETURN category
 ```
 
 Trovare tutti gli utenti che vivono nella stessa città dell'utente `@user`.
 
 ```AQL
-FOR v, e IN 1..1 OUTBOUND @user LivesIn 
-  FOR v1, e1 IN 1..1 INBOUND v LivesIn
-    FILTER v1 != @user
-  RETURN v1
+  WITH User, City
+  FOR city, e IN 1..1 OUTBOUND @user LivesIn 
+    FOR user, edge IN 1..1 INBOUND city LivesIn
+      FILTER user != @user
+  RETURN user
 ```
 
-Trovare tutti gli utenti che hanno un film preferito in comune con l'utente `@user`
- e che hanno frequentato la stessa università.
+Trovare tutti gli utenti che hanno la categoria di film preferita in comune con
+l'utente `@user` e che hanno frequentato la stessa università.
   
   ```AQL
-  FOR v, e IN 1..1 OUTBOUND @user IntMovieCategory
-    FOR v1, e1 IN 1..1 INBOUND v IntMovieCategory
-      FILTER v1 != @user
-    FOR v2, e2 IN 1..1 OUTBOUND @user StudiesAt
-      FOR v3, e3 IN 1..1 INBOUND v2 StudiesAt
-        FILTER v3 != @user
-      FILTER v3 == v1
-    RETURN v3
+  WITH User, MovieCategory, University
+  FOR category, e IN 1..1 OUTBOUND @user IntMovieCategory
+    FOR user1, e1 IN 1..1 INBOUND category IntMovieCategory
+      FILTER user1 != @user
+    FOR colleague, e2 IN 1..1 OUTBOUND @user StudiesAt
+      FOR user2, e3 IN 1..1 INBOUND colleague StudiesAt
+        FILTER user2 != @user
+    FILTER user1 == user2
+  RETURN user1
   ```
 
 Trovare tutti i like degli utenti che hanno fatto match con l'utente `@user`.
 
 ```AQL
-FOR v, e IN 1..1 ANY @user Matches
-  FOR v1, e1 IN 1..1 OUTBOUND v Likes
-RETURN v1
+  WITH User
+  FOR v, e IN 1..1 ANY @user Matches
+    FOR v1, e1 IN 1..1 OUTBOUND v Likes
+  RETURN v1
 ```
 
 Trovare tutti gli utenti che vivono nella nazione `@country`.
   
   ```AQL
+  WITH Country, City, User
   FOR city, edge IN 1..1 ANY  @country LocatedIn 
     FOR user, edge1 IN 1..1 ANY city LivesIn
   RETURN {"User": user._id, "City": city.name}
-  ```
+```
 
 Trovare il numero di utenti per ogni città.
 

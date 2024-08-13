@@ -74,6 +74,10 @@ def clear_all_collections(graph, db):
 
 
 def create_database(typeDB):
+    number_of_shards = 4
+    replication_factor = 3
+    write_concern = 2
+
     if typeDB == 0:
         client = ArangoClient(hosts="http://localhost:8529")
     elif typeDB == 1:
@@ -85,7 +89,11 @@ def create_database(typeDB):
         if typeDB == 0:
             sys_db.create_database("SoulSync")
         elif typeDB == 1:
-            sys_db.create_database("SoulSync")
+            sys_db.create_database(
+                "SoulSync",
+                replication_factor=replication_factor,
+                write_concern=write_concern,
+            )
 
     db = client.db("SoulSync", username="", password="")
 
@@ -99,9 +107,9 @@ def create_database(typeDB):
             graph = db.create_graph(
                 "SoulSyncGraph",
                 smart=True,
-                shard_count=4,
-                replication_factor=3,
-                write_concern=2,
+                shard_count=number_of_shards,
+                replication_factor=replication_factor,
+                write_concern=write_concern,
             )
         print("Graph created")
         create_collections(graph)

@@ -11,18 +11,23 @@ analysis = 0  # 0 no analysis, 1 for analysis
 nodes, edges, matches = read_all_csv()
 
 if typeDB == 0:
-    path_edges = "./results/loading_edges_cent.csv"
-    path_nodes = "./results/loading_nodes_cent.csv"
+    path_edges = "./results/loading_edges_cent_new_with_ack.csv"
+    path_nodes = "./results/loading_nodes_cent_new_with_ack.csv"
+    
+    # path_edges = "./results/loading_edges_cent_new.csv"
+    # path_nodes = "./results/loading_nodes_cent_new.csv"
 elif typeDB == 1:
-    path_edges = "./results/loading_edges_dist.csv"
-    path_nodes = "./results/loading_nodes_dist.csv"
+    # path_edges = "./results/loading_edges_dist_new_with_ack.csv"
+    # path_nodes = "./results/loading_nodes_dist_new_with_ack.csv"
+    
+    path_edges = "./results/loading_edges_dist_new_wc1.csv"
+    path_nodes = "./results/loading_nodes_dist_new_wc1.csv"
 
 start = time.time()
 db, graph = create_database(typeDB)
 print("Time to create database: ", time.time() - start)
 
 # clear_all_collections(graph, db)
-
 
 input("Press Enter to continue with insertion...")
 
@@ -44,19 +49,20 @@ input("Press Enter to continue with queries...")
 
 print("Executing queries...")
 df = execute_all_queries("User/100", "US", db)
-print(df.mean().T)
-print(df.std().T)
+df.to_csv("./results/queries_results_node_1.csv", index=False)
+# print(df.mean().T)
+# print(df.std().T)
 
-input("Press Enter to continue with updates...")
-update_all_city(db)
-update_all_like(db)
-update_user_city_edge("User/0", "City/100", db)
-replace_all_user_field("100", {"name": "John Doe", "age": 30}, db)
+# input("Press Enter to continue with updates...")
+# # update_all_city(db)
+# # update_all_like(db)
+# # update_user_city_edge("User/0", "City/100", db)
+# # replace_all_user_field("100", {"name": "John Doe", "age": 30}, db)
 
-input("Press Enter to continue with removals...")
+# input("Press Enter to continue with removals...")
 
-# delete_user_py("User/100", db, graph)
-# delete_user_AQL("User/101", db)
-# delete_user_color_edge("User/102", db)
+# # delete_user_py("User/100", db, graph)
+# # delete_user_AQL("User/101", db)
+# # delete_user_color_edge("User/102", db)
 
-print("Users deleted successfully")
+# print("Users deleted successfully")

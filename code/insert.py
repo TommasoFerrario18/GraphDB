@@ -19,6 +19,12 @@ def parse_movie_generes(nodes: pd.DataFrame) -> list:
         lambda x: [i.replace("[", "").replace("]", "").replace(" ", "") for i in x]
     )
     flat_list = [x for xs in rows.to_list() for x in xs]
+    if "nan" in flat_list:
+        print("nan in flat list")
+        flat_list.remove("nan")
+    if "(nogenreslisted)" in flat_list:
+        flat_list.remove("(nogenreslisted)")
+        
     return pd.Series(flat_list).unique().tolist()
 
 
@@ -26,7 +32,7 @@ batch_size = 100
 
 
 def insert_batch(batch, collection):
-    collection.insert_many(batch)
+    collection.insert_many(batch, silent=False, sync=False)
 
 
 def load_movies_batch(movies: list, db):
